@@ -3424,6 +3424,7 @@ bool b_stricmp(char *str1, char *str2)
 		if(ch1!=ch2) return true;					// not equal
 		i++;
 	}
+	return false;
 }
 
 /*
@@ -9627,21 +9628,25 @@ void R_LoadScreenImages()
 	char	name[MAX_QPATH];
 
 	glfx_mask = GL_FindImage ("pics/effects/mask.tga", it_fx, true, 0, false, 0);
-	if (!glfx_mask)
+	if (!glfx_mask) {
 		Com_Printf("^1Can't find pic: pics/effects/mask.tga\n");
-
+		printf("Can't find pic: pics/effects/mask.tga\n");
+	}
 	glfx_maskenv = GL_FindImage ("pics/effects/maskenv.tga", it_fx, true, 0, false, 0);
-	if (!glfx_maskenv)
+	if (!glfx_maskenv){
 		Com_Printf("^1Can't find pic: pics/effects/maskenv.tga\n");
-
+		printf("Can't find pic: pics/effects/maskenv.tga\n");
+	}
 	glfx_drown = GL_FindImage ("pics/effects/drown.tga", it_fx, true, 0, false, 0);
-	if (!glfx_drown)
+	if (!glfx_drown){
 		Com_Printf("^1Can't find pic: pics/effects/drown.tga\n");
-
+		printf("Can't find pic: pics/effects/drown.tga\n");
+	}
 	glfx_underwater = GL_FindImage ("pics/effects/underwater.tga", it_fx, true, 0, false, 0);
-	if (!glfx_underwater)
+	if (!glfx_underwater){
 		Com_Printf("^1Can't find pic: pics/effects/underwater.tga\n");
-
+		printf("Can't find pic: pics/effects/underwater.tga\n");
+	}
 	for (num_pains=0; num_pains<MAX_RFX_IMAGES; num_pains++)
 		glfx_pain[num_pains] = glfx_burn[num_pains] = NULL;
 
@@ -9652,9 +9657,10 @@ void R_LoadScreenImages()
 		if (!glfx_pain[num_pains])
 			break;
 	}
-	if (!num_pains)
+	if (!num_pains) {
 		Com_Printf("^1Can't find any 'pain' pic\n");
-
+		printf("Can't find any 'pain' pic\n");
+	}
 	for (num_burns=0; num_burns<MAX_RFX_IMAGES; num_burns++)
 	{
 		Com_sprintf (name, sizeof(name), "pics/effects/burn_%i.tga", num_burns);
@@ -9662,8 +9668,10 @@ void R_LoadScreenImages()
 		if (!glfx_burn[num_burns])
 			break;
 	}
-	if (!num_burns)
+	if (!num_burns) {
 		Com_Printf("^1Can't find any 'burn' pic\n");
+		printf("Can't find any 'burn' pic\n");	
+	}
 }
 
 
@@ -9673,6 +9681,7 @@ int R_Init()
 	char vendor_buffer[1000];
 	int	err;
 
+	printf("R_Init(): Begin...\n" );
 	Init_Palette ();
 
 	R_Register();
@@ -9684,16 +9693,21 @@ int R_Init()
 	if ( !R_SetMode () )
 	{
 		Com_Printf("^1R_Init(): could not R_SetMode()\n" );
+		printf("R_Init(): could not R_SetMode()\n" );
 		return -1;
 	}
+	printf("R_Init(): R_SetMode() done.\n" );
 
 	// get our various GL strings
 	gl_config.vendor_string = (char*)glGetString (GL_VENDOR);
 	Com_Printf("GL_VENDOR: %s\n", gl_config.vendor_string );
+	printf("GL_VENDOR: %s\n", gl_config.vendor_string );
 	gl_config.renderer_string = (char*)glGetString (GL_RENDERER);
 	Com_Printf("GL_RENDERER: %s\n", gl_config.renderer_string );
+	printf("GL_RENDERER: %s\n", gl_config.renderer_string );
 	gl_config.version_string = (char*)glGetString (GL_VERSION);
 	Com_Printf("GL_VERSION: %s\n", gl_config.version_string );
+	printf("GL_VERSION: %s\n", gl_config.version_string );
 	gl_config.extensions_string = (char*)glGetString (GL_EXTENSIONS);
 
 	// Before VID_MenuInit!
@@ -9711,6 +9725,7 @@ int R_Init()
 	char *string = (char*)gl_config.extensions_string;
 //	Com_Printf("GL_EXTENSIONS: %s\n", gl_config.extensions_string );	// From old engine...
 	Com_Printf("\nGL_EXTENSIONS:\n--------------\n");
+	printf("\nGL_EXTENSIONS:\n--------------\n");
 	char c, line[128];
 	int i;
 	while (1)
@@ -9729,8 +9744,10 @@ int R_Init()
 			break;
 		line[i] = 0;
 		Com_Printf("%s\n", line);
+		printf("%s\n", line);
 	}
 	Com_Printf("\n");
+	printf("\n");
 
 	strcpy( renderer_buffer, gl_config.renderer_string );
 	strlwr( renderer_buffer );
@@ -9742,15 +9759,20 @@ repeat:
 	if(!GL_SelectShader())
 	{
 		Com_Printf("^1No shaders available!\n");
+		printf("No shaders available!\n");
 		if (!r_simple->value)
 		{
 			Cvar_ForceSetValue("r_simple", 1);
 			Com_Printf("^3r_simple forced to 1\n");
+			printf("r_simple forced to 1\n");
 			goto repeat;
 		}
-		else
+		else {
+			printf("R_Init(): GL_SelectShader() Error!\n");
 			return -1;
+		}
 	}
+	printf("R_Init(): GL_SelectShader() done!\n");
 
 	if(gl_config.anisotropic && r_anisotropy->value)
 		Com_Printf("...using anisotropy: %i\n", (int)r_anisotropy->value);
@@ -9883,8 +9905,10 @@ repeat:
 	if(!Draw_InitFonts ())
 	{
 		Com_Printf("^1X..Error loading font texture\n");
+		printf("X..Error loading font texture\n");
 		return -1;
 	}
+	printf("Draw_InitFonts.. loading font texture done.\n");
 
 	if (gl_config.occlusion)
 	{
@@ -12999,6 +13023,7 @@ material_t	*R_RegisterMaterial(char *name)
 	material = R_LoadMaterial(name, matdata, hash);
 	material->framecount = 1;
 	Z_Free (matdata);
+	printf("Register material done...\n");
 	return material;
 }
 
@@ -16414,9 +16439,9 @@ fail:					ent.skin = cl.baseclientinfo.skin;
 				if ((renderfx & RF_USE_DISGUISE) && cl_disguise_model)
 				{
 					ent.model = cl_disguise_model;
-					ent.skin = cl_disguise_skin;
-					ent.bump = cl_disguise_bump;
-					ent.light = cl_disguise_light;
+					ent.skin = (void *)cl_disguise_skin;
+					ent.bump = (void *)cl_disguise_bump;
+					ent.light = (void *)cl_disguise_light;
 				}
 //PGM
 //============
@@ -30647,6 +30672,66 @@ void Sys_Init ()
 }
 
 
+/*
+====================
+NET_Socket
+====================
+*/
+int NET_IPSocket (char *net_interface, int port)
+{
+	int					newsocket;
+	struct sockaddr_in	address;
+	unsigned long		_true = 1;
+	int					i = 1;
+	int					err;
+
+	if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
+	{
+		err = socketError;
+		if (err != EAFNOSUPPORT)
+			Com_DPrintf ("WARNING: UDP_OpenSocket: socket: %s\n", NET_ErrorString());
+		return -1;
+	}
+
+	// make it non-blocking
+	if (ioctl (newsocket, FIONBIO, &_true) == -1)
+	{
+		Com_DPrintf ("WARNING: UDP_OpenSocket: ioctl FIONBIO: %s\n", NET_ErrorString());
+		close (newsocket);
+		return -1;
+	}
+
+	// make it broadcast capable
+	if (setsockopt(newsocket, SOL_SOCKET, SO_BROADCAST, (char *)&i, sizeof(i)) == -1)
+	{
+		Com_DPrintf ("WARNING: UDP_OpenSocket: setsockopt SO_BROADCAST: %s\n", NET_ErrorString());
+		close (newsocket);
+		return -1;
+	}
+
+	if (!net_interface || !net_interface[0] || !stricmp(net_interface, "localhost"))
+		address.sin_addr.s_addr = INADDR_ANY;
+	else
+		NET_StringToSockaddr (net_interface, (struct sockaddr *)&address);
+
+	if (port == PORT_ANY)
+		address.sin_port = 0;
+	else
+		address.sin_port = htons((short)port);
+
+	address.sin_family = AF_INET;
+
+	if( bind (newsocket, (struct sockaddr *)&address, sizeof(address)) == -1)
+	{
+		Com_DPrintf ("WARNING: UDP_OpenSocket: bind: %s\n", NET_ErrorString());
+		close (newsocket);
+		return -1;
+	}
+
+	return newsocket;
+}
+
+
 void NET_Init ()
 {
 #ifdef _WIN32
@@ -31323,66 +31408,6 @@ void SV_ConSay_f()
 			continue;
 		SV_ClientPrintf(client, PRINT_CHAT, "%s\n", text);
 	}
-}
-
-
-/*
-====================
-NET_Socket
-====================
-*/
-int NET_IPSocket (char *net_interface, int port)
-{
-	int					newsocket;
-	struct sockaddr_in	address;
-	unsigned long		_true = 1;
-	int					i = 1;
-	int					err;
-
-	if ((newsocket = socket (PF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1)
-	{
-		err = socketError;
-		if (err != EAFNOSUPPORT)
-			Com_DPrintf ("WARNING: UDP_OpenSocket: socket: %s\n", NET_ErrorString());
-		return -1;
-	}
-
-	// make it non-blocking
-	if (ioctl (newsocket, FIONBIO, &_true) == -1)
-	{
-		Com_DPrintf ("WARNING: UDP_OpenSocket: ioctl FIONBIO: %s\n", NET_ErrorString());
-		close (newsocket);
-		return -1;
-	}
-
-	// make it broadcast capable
-	if (setsockopt(newsocket, SOL_SOCKET, SO_BROADCAST, (char *)&i, sizeof(i)) == -1)
-	{
-		Com_DPrintf ("WARNING: UDP_OpenSocket: setsockopt SO_BROADCAST: %s\n", NET_ErrorString());
-		close (newsocket);
-		return -1;
-	}
-
-	if (!net_interface || !net_interface[0] || !stricmp(net_interface, "localhost"))
-		address.sin_addr.s_addr = INADDR_ANY;
-	else
-		NET_StringToSockaddr (net_interface, (struct sockaddr *)&address);
-
-	if (port == PORT_ANY)
-		address.sin_port = 0;
-	else
-		address.sin_port = htons((short)port);
-
-	address.sin_family = AF_INET;
-
-	if( bind (newsocket, (struct sockaddr *)&address, sizeof(address)) == -1)
-	{
-		Com_DPrintf ("WARNING: UDP_OpenSocket: bind: %s\n", NET_ErrorString());
-		close (newsocket);
-		return -1;
-	}
-
-	return newsocket;
 }
 
 
@@ -39686,7 +39711,7 @@ void *Sys_GetGameAPI (void *parms)
 #ifdef _WIN32
 	const char *gamename = "game.dll";
 #else
-	const char *gamename = "game.so";
+	const char *gamename = "libgame.so";
 #endif
 
 	if (game_library)
@@ -45658,6 +45683,7 @@ void SDL_EventProc(SDL_Event *ev)
 bool VID_LoadRefresh()
 {
 	Com_Printf( "------- Video System restart -------\n", name );
+	printf( "------- Video System restart -------\n", name );
 
 	if ( reflib_active )
 		R_Shutdown();
@@ -95698,9 +95724,9 @@ void CL_RegisterTEntModels ()
 	cl_disguise_model = R_RegisterModel ("players/cyborg/tris.md2", 1, false);
 	if (cl_disguise_model)
 	{
-		cl_disguise_skin = R_RegisterSkin ("players/cyborg/disguise");
-		cl_disguise_bump = R_RegisterBump ("players/cyborg/disguise", cl_disguise_skin, cl_disguise_model);
-		cl_disguise_light = R_RegisterLight ("players/cyborg/disguise");
+		cl_disguise_skin = (void *)R_RegisterSkin ("players/cyborg/disguise");
+		cl_disguise_bump = (void *)R_RegisterBump ("players/cyborg/disguise", (void *)cl_disguise_skin, cl_disguise_model);
+		cl_disguise_light = (void *)R_RegisterLight ("players/cyborg/disguise");
 	}
 
 /// кэшируем все 3D hud models сначала из паков, затем из папки models/hud (кэшируем без шкурок)
