@@ -55,6 +55,9 @@ If you have access to a copy of the game (either by CD or through Steam),
 you can copy the **pak0-2.pak** files and **player,video** from the game   
 directory to the repository (put it in the **baseq2 repository directory**).  
 
+#### NOTE:
+**pak0-2.pak** must have lowercase names.
+
 #### Building with CMakeLists.txt
 
 Type this in your terminal:
