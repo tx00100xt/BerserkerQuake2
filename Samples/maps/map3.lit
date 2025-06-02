@@ -1,0 +1,197 @@
+{
+"classname" "worldspawn"
+"ambient" "0.10 0.10 0.10"
+}
+//Light 0
+{
+"classname" "light"
+"light" "100"
+"origin" "1168 736 112"
+"color" "1.00 1.00 0.00"
+}
+//Light 1
+{
+"classname" "light"
+"light" "100"
+"origin" "1168 392 112"
+"color" "1.00 1.00 0.00"
+}
+//Light 2
+{
+"classname" "light"
+"light" "500"
+"origin" "1152 144 112"
+"color" "0.70 1.00 0.85"
+}
+//Light 3
+{
+"classname" "light"
+"light" "500"
+"origin" "1152 480 112"
+"color" "0.70 1.00 0.85"
+}
+//Light 4
+{
+"classname" "light"
+"radius" "600 600 2000"
+"origin" "1089 -722 300"
+"angles" "76 -175 0"
+}
+//Light 5
+{
+"classname" "light"
+"origin" "1032 22 120"
+"cl_style" "1"
+}
+//Light 6
+{
+"classname" "light"
+"origin" "1032 -642 120"
+"cl_style" "1"
+}
+//Light 7
+{
+"classname" "light"
+"origin" "1166 -604 128"
+"angles" "-280 83 0"
+"cone" "1.000000"
+"filter" "4"
+}
+{
+"classname" "decal"
+"origin" "839.887146 459.742462 50.265984"
+"angle" "45.000000"
+"filter" "129"
+"style" "1"
+"volume" "32"
+"dir" "1.00 0.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "1009.692871 -184.188660 7.150650"
+"angle" "256.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 0.00 1.00"
+}
+{
+"classname" "decal"
+"origin" "997.129456 -184.412201 0.936058"
+"angle" "111.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 0.00 1.00"
+}
+{
+"classname" "decal"
+"origin" "1090.910034 -786.543030 7.473732"
+"angle" "60.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 0.00 1.00"
+}
+{
+"classname" "decal"
+"origin" "1123.800781 -798.428162 0.950329"
+"angle" "90.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 0.00 1.00"
+}
+{
+"classname" "decal"
+"origin" "1090.910034 -122.543030 7.473732"
+"angle" "60.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 0.00 1.00"
+}
+{
+"classname" "decal"
+"origin" "1123.800781 -134.428162 0.950329"
+"angle" "90.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 0.00 1.00"
+}
+{
+"classname" "decal"
+"origin" "1159.323730 -127.806946 0.756157"
+"angle" "120.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 0.00 1.00"
+}
+{
+"classname" "decal"
+"origin" "1159.323730 -791.806946 0.756157"
+"angle" "120.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 0.00 1.00"
+}
+{
+"classname" "decal"
+"origin" "1278.983154 487.972687 54.933296"
+"filter" "128"
+"volume" "32"
+"dir" "-1.00 0.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "1278.983154 143.972687 54.933296"
+"filter" "128"
+"volume" "32"
+"dir" "-1.00 0.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "1074.993530 145.146820 0.778984"
+"angle" "-90.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 0.00 1.00"
+}
+{
+"classname" "decal"
+"origin" "1012.065186 203.207779 52.669849"
+"angle" "-45.000000"
+"filter" "130"
+"style" "1"
+"volume" "48"
+"dir" "0.00 1.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "1032.003662 402.682739 50.605904"
+"angle" "45.000000"
+"filter" "132"
+"volume" "32"
+"dir" "1.00 0.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "1032.003662 746.682739 50.605904"
+"angle" "45.000000"
+"filter" "132"
+"volume" "32"
+"dir" "1.00 0.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "1012.065186 203.207779 52.669849"
+"angle" "-45.000000"
+"filter" "131"
+"volume" "48"
+"dir" "0.00 1.00 0.00"
+}
+//Ignored light surfaces
+{
+"classname" "ignored_lightsurfs"
+"surfaces" "21 23 24 33 36 38"
+}
+{
+"classname" "cl_lightstyle"
+"style" "1"
+"map" "abcdefzzzzzfeda"
+}

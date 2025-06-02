@@ -1,0 +1,15 @@
+//Light 0
+{
+"classname" "light"
+"light" "1000"
+"origin" "32 0 176"
+"color" "0.50 0.30 0.00"
+}
+//Light 1
+{
+"classname" "light"
+"origin" "144 0 121"
+"angles" "8 0 0"
+"cone" "1.000000"
+"filter" "129"
+}

@@ -1,0 +1,70 @@
+// health
+xv	0
+yb	-26
+hnum
+xv	50
+yb	-33
+sc	1.3
+pic 0
+
+xv	156
+yb	-49
+sc	1.5
+pici
+sc	1
+yb	-26
+
+// armor
+if 4
+	xv	80
+	rnum
+	xv	130
+	pic 4
+endif
+
+// ammo
+if 2
+	xv	200
+	anum
+	xv	250
+	pic 2
+endif
+
+// selected item
+if 6
+	xv	276
+	yb	-45
+	sc	1.8
+	pic 6
+	sc	1
+endif
+
+yb	-52
+
+// picked up item
+if 7
+	xv	0
+	pic 7
+	xv	26
+	yb	-44
+	stat_string 8
+	yb	-52
+endif
+
+// timer
+if 9
+	xv	242	//236
+	yb	-71
+	num	2	10
+	xv	276
+	yb	-90
+	sc	1.8
+	pic	9
+	sc	1
+endif
+
+//  help / weapon icon
+if 11
+	xv	130	//148
+	pic	11
+endif

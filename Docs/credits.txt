@@ -1,0 +1,169 @@
+Rus:			Благодарности
+
+Alexander Betliy aka ATex	художник-дизайнер, идеи дизайна
+	http://qexpo.tastyspleen.net/booth.php?id=145
+
+[RWT]DOOMer			хостинг сайта berserker.quakegate.ru
+	http://quakegate.ru
+
+Kirk Barnes & KriGSSv1N		Q2XP, частичный ретекстур
+	http://kirkbarnes.users.sourceforge.net/
+
+GT-Agressor			частичный ретекстур
+
+Jim and Chris Waurzyniak	коллекция текстур и шкур высокого разрешения, ретекстур.
+	http://www-personal.umich.edu/~jimw/q2
+Quake II Retexture Portal		http://texture.dragonwerks.ca/default.aspx?Content=Sections 
+Stannum's Quake2 Retexture Project	http://www.echon.org/index.php?section=retex&page=stannum 
+EGL					http://egl.quakedev.com/ 
+Quake2maX				http://www.quake2max.com/downloads/textures/ 
+Idler's Hideout				http://idle.iceware.net/ 
+
+Turic				высокодетальные модели
+	http://CTPEJIOK22.deviantart.com
+
+Некоторые модели из "Generations Arena"
+Paril		Конверсия Md3 в Md2	http://parilsprojects.org/
+
+Quake Retexturing Project	Некоторые текстуры для римейков Quake карт
+	http://facelift.quakedev.com/retexture/
+
+CombatEnforcer			Доп.текстуры светофильтров
+
+Matt "Lunaran"  Breit		Элементы текстур/карт нормалей и пр.
+				которые были применены в ретекстуре.
+
+http://www.filterforge.com	Набор текстур/карт нормалей и пр.
+				которые были применены в ретекстуре.
+
+Anthony Jacques			Исправление ошибки "Function pointers have moved"
+				http://www.btinternet.com/~anthonyj/projects/FunctionPtrs/
+
+Kjell Andersson			Программа Caustics Generator v1.4
+Mathias Bergvall
+http://www.lysator.liu.se/~kand/caustics/
+
+Шабров Сергей aka V_2540	бета-тестирование
+D_R_				бета-тестирование и осколки/мясо бочек/игроков/монстров
+Смыч				бета-тестирование
+Enf0rcer			бета-тестирование
+
+tigrik2017			звуковые треки
+
+Alexander Betliy aka ATex
+Sergey Dovzhenko		саунд трек меню Credits
+
+Особая благодарность Сергею Шаброву за предоставленное железо:
+		Gigabyte ATI HD5830
+		блок питания Zalman 600W
+		процессор Q9450 и кулер Zalman 9600
+		системная плата на чипсете P45
+		ОЗУ 4 ГБ HyperX
+		22" ViewSonic VX2255wmb
+
+проект Tenebrae			некоторые алгоритмы попикселки
+	http://tenebrae.sourceforge.net/
+
+форум quakedev.com		общество quake разработчиков
+	http://www.quakedev.com/forums/index.php
+
+Компания id software		великий движок Quake  :)
+	http://www.idsoftware.com/
+
+Хад-модель головы QuakeGuy:
+The original mesh and skin were by Moo, slightly edited by OoPpEe.
+
+Richard \R1CH\ Stanway	r1ch.net	antiche.at	Античит-поддержка
+							r1q2
+							r1q2 выделенный сервер
+
+Knightmare		kmq2.quakedev.com		kmq2
+
+Перевод документации на английский	Alien_911
+
+==========================================================================
+
+Eng:			Credits
+
+Alexander Betliy aka ATex	Art designer
+	http://qexpo.tastyspleen.net/booth.php?id=145
+
+[RWT]DOOMer			Host for berserker.quakegate.ru
+	http://quakegate.ru
+
+Kirk Barnes & KriGSSv1N		Q2XP, retexture
+	http://kirkbarnes.users.sourceforge.net/
+
+GT-Agressor			retexture
+
+Jim and Chris Waurzyniak	full hi-res textures/skins collection, retexture.
+	http://www-personal.umich.edu/~jimw/q2
+Quake II Retexture Portal		http://texture.dragonwerks.ca/default.aspx?Content=Sections 
+Stannum's Quake2 Retexture Project	http://www.echon.org/index.php?section=retex&page=stannum 
+EGL					http://egl.quakedev.com/ 
+Quake2maX				http://www.quake2max.com/downloads/textures/ 
+Idler's Hideout				http://idle.iceware.net/ 
+
+Turic				hi-poly models
+	http://CTPEJIOK22.deviantart.com
+
+Some models from: "Generations Arena"
+Md3 to Md2 conversion by Paril		http://parilsprojects.org/
+
+Quake Retexturing Project	Some hi-res textures for Quake maps re-makes.
+	http://facelift.quakedev.com/retexture/
+
+CombatEnforcer			Some light filters.
+
+Matt "Lunaran"  Breit		Textures/NormalMaps and etc.
+				which was used for re-texture.
+
+http://www.filterforge.com	Textures/NormalMaps and etc.
+				which was used for re-texture.
+
+Anthony Jacques			BugFix: "Function pointers have moved"
+				http://www.btinternet.com/~anthonyj/projects/FunctionPtrs/
+
+Kjell Andersson			Caustics Generator v1.4
+Mathias Bergvall
+http://www.lysator.liu.se/~kand/caustics/
+
+Serge \V_2540\ Shabrov		Beta testing
+D_R_				Beta testing & Monster/Player/Barrel gibs/debris
+Smich				Beta testing
+Enf0rcer			Beta testing
+
+tigrik2017			Sound tracks
+
+Alexander Betliy aka ATex
+Sergey Dovzhenko		Credits sound track
+
+Special thanks to Serge \V_2540\ Shabrov for hardware:
+		Gigabyte ATI HD5830
+		Power Supply Unit Zalman 600W
+		CPU Q9450 & cooler Zalman 9600
+		motherboard P45
+		RAM 4 GB HyperX
+		22" ViewSonic VX2255wmb
+
+project Tenebrae		learning for PPL and some algorithms
+	http://tenebrae.sourceforge.net/
+
+forum quakedev.com		quake developers
+	http://www.quakedev.com/forums/index.php
+
+id software			Quake Engine  :)
+	http://www.idsoftware.com/
+
+QuakeGuy head hud-model:
+The original mesh and skin were by Moo, slightly edited by OoPpEe.
+
+Richard \R1CH\ Stanway		r1ch.net	antiche.at	Anticheat
+								r1q2
+								r1q2 dedicated server
+
+Knightmare		kmq2.quakedev.com			kmq2
+
+Documents English translation	by Alien_911
+
+==========================================================================

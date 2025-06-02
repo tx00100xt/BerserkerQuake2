@@ -1,0 +1,71 @@
+{
+"classname" "worldspawn"
+"ambient" "0.10 0.10 0.10"
+}
+//Light 0
+{
+"classname" "light"
+"light" "120"
+"origin" "71 0 81"
+"color" "0.00 1.00 0.00"
+"angles" "90 0 90"
+"cone" "1.000000"
+"style" "4"
+"filter" "4"
+}
+//Light 1
+{
+"classname" "light"
+"light" "100"
+"origin" "77 0 57"
+"color" "0.00 0.20 0.00"
+"noshadow2" "1"
+}
+//Light 2
+{
+"classname" "light"
+"radius" "100 100 300"
+"origin" "256 0 113"
+"color" "1.00 0.80 0.00"
+"angles" "90 0 0"
+"cone" "1.000000"
+"style" "32"
+"cl_style" "1"
+"filter" "29"
+"targetname" "l1"
+"spawnflags" "1"
+}
+//Light 3
+{
+"classname" "light"
+"light" "1000"
+"origin" "562 103 304"
+}
+{
+"classname" "decal"
+"origin" "129.121124 -31.172726 34.939598"
+"angle" "75.000000"
+"filter" "128"
+"style" "1"
+"volume" "32"
+"dir" "0.00 1.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "25.133541 26.983099 38.404583"
+"angle" "45.000000"
+"filter" "128"
+"style" "1"
+"volume" "32"
+"dir" "0.00 -1.00 0.00"
+}
+//Ignored light surfaces
+{
+"classname" "ignored_lightsurfs"
+"surfaces" "17 18"
+}
+{
+"classname" "cl_lightstyle"
+"style" "1"
+"map" "aabbccddeeffgghhiijjkkllmmnnoopqrstuvwxyzyxwvutsrqpomkigec"
+}
