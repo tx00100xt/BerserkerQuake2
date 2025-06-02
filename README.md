@@ -1,5 +1,7 @@
 # Berserker@Quake2 Engine
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/tx00100xt/BerserkerQuake2)](https://github.com/tx00100xt/BerserkerQuake2/releases/tag/1.45.1-beta1)
+[![Github downloads](https://img.shields.io/github/downloads/tx00100xt/BerserkerQuake2/total.svg?logo=github&logoColor=white&style=flat-square&color=E75776)](https://github.com/tx00100xt/BerserkerQuake2/releases/)
 
 Berserker@Quake2 engine that modernizes some elements of the Quake 2 graphical system.  
 This Berserker engine supports real-time per-pixel lighting and shadow volumes, parallax,  
@@ -101,6 +103,9 @@ Type this in your terminal:
 cd BerserkerQuake2
 ./berserkerq2
 ```
+#### NOTE:
+Non-standard screen resolution can be specified in the modelist.txt file.
+
 Supported Architectures
 ----------------------
 * `x86`
