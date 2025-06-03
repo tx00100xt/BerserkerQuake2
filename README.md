@@ -97,11 +97,10 @@ You can view additional commands for make by typing the make command in the term
 ### Running the game
 
 Then you will have to get some extra data that comes with this engine. You can get it from  
-[Release section](https://github.com/tx00100xt/BerserkerQuake2/releases). Extract the archive in  your BerserkerQuake2 directory. The content itself  
-is identical to those hosted at official website and ModDB, except nedeed file names were converted  
-to lower case and the contents of the *.fx and *.sp3 files were edited so that the paths to the textures  
-files were in lower case, so hopefully there isn't any problem with file  
-access on Linux and BSD systems.  
+[Release section](https://github.com/tx00100xt/BerserkerQuake2/releases). Extract the archive in  your BerserkerQuake2 directory. The content itself is identical to those hosted  
+at official website and ModDB, except all file names were converted  to lower case. The contents of the *.fx and *.sp3 files were  
+edited so that the paths to the textures files were in lower case  and references to them, as well as paths have been fixed to use  
+slashes instead of backslashesso. Hopefully there isn't any problem with file access on Linux and BSD systems.  
 
 After this run game.  
 Type this in your terminal:  
