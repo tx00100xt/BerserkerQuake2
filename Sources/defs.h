@@ -77,6 +77,256 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #define FP_BITS(fp) (* (DWORD *) &(fp))
 
+// ###########################################################################
+// be a little more discerning, using these macros will ensure that if someone
+// wants to use MINGW then they can
+#if (defined _WIN32) || (defined _WIN64) 
+  #ifndef PLATFORM_WIN32
+    #define PLATFORM_WIN32 1
+  #endif
+
+  #ifndef PRAGMA_ONCE
+    #define PRAGMA_ONCE
+  #endif
+
+  // disable problematic warnings
+  #pragma warning(disable: 4251)  // dll interfacing problems
+  #pragma warning(disable: 4275)  // dll interfacing problems
+  #pragma warning(disable: 4018)  // signed/unsigned mismatch
+  #pragma warning(disable: 4244)  // type conversion warnings
+  #pragma warning(disable: 4284)  // using -> for UDT
+  #pragma warning(disable: 4355)  // 'this' : used in base member initializer list
+  #pragma warning(disable: 4660)  // template-class specialization is already instantiated
+  #pragma warning(disable: 4723)  // potential divide by 0
+
+#elif (defined __linux__) 
+  #if (defined __ANDROID__) || (defined __android__) 
+    #error "Android current isn't supported"
+  #else
+    #define PLATFORM_LINUX 1
+  #endif
+#elif (defined __APPLE__)
+    #define PLATFORM_MACOSX 1
+#elif (defined __FreeBSD__)
+    #define PLATFORM_FREEBSD 1
+#elif (defined __OpenBSD__) || (defined __NetBSD__)
+    #define PLATFORM_OPENBSD 1
+    #define PLATFORM_FREEBSD 1
+#else
+  #warning "UNKNOWN PLATFORM IDENTIFIED!!!!"
+  #define PLATFORM_UNKNOWN 1
+#endif
+
+#if PLATFORM_LINUX || PLATFORM_MACOSX
+  #ifndef PLATFORM_UNIX
+    #define PLATFORM_UNIX 1
+  #endif
+#endif 
+
+#if defined(__arm__)
+# define INDEX_T unsigned short
+# define INDEX_GL GL_UNSIGNED_SHORT
+# define FASTMATH
+#else
+# define INDEX_T INDEX
+# define INDEX_GL GL_UNSIGNED_INT
+# define FASTMATH
+#endif
+
+// TODO: add more architecture detection routines
+#if __POWERPC__ || (defined __ppc64__) || (defined __alpha__) || (defined __sparc__) /* rcg03232004 */
+  #define PLATFORM_BIGENDIAN 1
+  #define PLATFORM_LITTLEENDIAN 0
+#else
+  #define PLATFORM_BIGENDIAN 0
+  #define PLATFORM_LITTLEENDIAN 1
+#endif
+
+#if defined(__riscv) && (__riscv_xlen == 64)
+  #define PLATFORM_RISCV64 1
+#else
+  #define PLATFORM_RISCV64 0
+#endif
+
+#if defined(__aarch64__) || defined(__arm__) || PLATFORM_RISCV64 || defined(mips) || defined(__mips__) || defined(__mips) || defined(__s390x__) || defined(__s390__) \
+    || defined(_powerpc)  || defined(__powerpc__)  || defined(__powerpc64__)  || defined(__POWERPC__)  || defined(__ppc__) \
+    || defined(__ppc64__)  || defined(__PPC__)  || defined(__PPC64__)  || defined(_ARCH_PPC)  || defined(_ARCH_PPC64) || defined(_M_IA64) || defined(__IA64__) || defined(__e2k__) \
+    || defined(__loongarch_lp64) || defined(__loongarch_double_float) || defined(__loongarch_single_float) || defined(__loongarch_soft_float)
+  #define PLATFORM_NOT_X86 1
+#else
+  #define PLATFORM_NOT_X86 0
+#endif
+
+#if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__) || defined(_ARCH_PPC64) \
+    || defined(_M_IA64) || defined(__IA64__) || defined(__e2k__) || PLATFORM_RISCV64 || defined(__powerpc64__) || defined(__s390x__) || defined(__ppc64__) \
+    || defined(__loongarch_lp64) || defined(__loongarch_double_float) || defined(__loongarch_single_float) || defined(__loongarch_soft_float)
+
+  #define PLATFORM_64BIT 1
+
+#elif defined(__i386) || defined(_M_IX86) || defined(__arm__) || defined(_M_ARM) || defined(__POWERPC__) \
+      || defined(_M_PPC) || defined(_ARCH_PPC) || (defined(mips) && !defined(__LP64__)) || (defined(mips__) && !defined(__LP64__)) || (defined(__mips__) && !defined(__LP64__))
+
+  #define PLATFORM_32BIT 1
+
+#else
+  #error "Unknown CPU-Architecture, adapt this code to detect 32/64bitness of your system!"
+#endif
+
+// if the compiler complains about the typedef created by MY_STATIC_ASSERT being invalid
+// (because of array with negative size), it means the check for cond has failed
+#define MY_STATIC_ASSERT(namesuffx, cond) \
+  typedef char sesam__check_ ## namesuffx [ (cond) ? 1 : -1 ];
+
+// some sanity checks to make sure the PLATFORM_*BIT #defines match the pointer size
+// and that size_t is the size of a pointer, as expected (as we sometimes use size_t to store pointers)
+#ifdef PLATFORM_32BIT
+  MY_STATIC_ASSERT(32bit_PointerSize, sizeof(void*) == 4);
+
+  #ifdef PLATFORM_64BIT
+    #error "PLATFORM_32BIT and PLATFORM_64BIT must not be #defined at the same time!"
+  #endif
+#endif
+
+#ifdef PLATFORM_64BIT
+  MY_STATIC_ASSERT(64bit_PointerSize, sizeof(void*) == 8);
+#endif
+
+MY_STATIC_ASSERT(size_tSize, sizeof(size_t) == sizeof(void*));
+
+#undef MY_STATIC_ASSERT
+
+// Mac symbols have an underscore prepended...
+#if PLATFORM_MACOSX
+  #define ASMSYM(x) "_" #x
+#else
+  #define ASMSYM(x) #x
+#endif
+
+/* should we enable inline asm? */
+#ifndef USE_PORTABLE_C
+  #if defined(__MSVC_INLINE__)
+    /* the build system selected __MSVC_INLINE__ */
+  #elif defined(__GNU_INLINE_X86_32__)
+    /* the build system selected __GNU_INLINE_X86_32__ */
+  #elif defined(_MSC_VER) && defined(_M_IX86)
+    #define __MSVC_INLINE__
+  #elif defined (__GNUC__) && defined(__i386)
+    #define __GNU_INLINE_X86_32__
+  #elif defined (__GNUC__) && defined(__x86_64__)
+    #define __GNU_INLINE_X86_64__
+  #endif
+
+  #if defined(__GNU_INLINE_X86_32__) || defined(__GNU_INLINE_X86_64__)
+    #define __GNU_INLINE_X86__
+  #endif
+
+  #if defined(__GNU_INLINE_X86__)
+    #define FPU_REGS "st", "st(1)", "st(2)", "st(3)", "st(4)", "st(5)", "st(6)", "st(7)"
+    #define MMX_REGS "mm0", "mm1", "mm2", "mm3", "mm4", "mm5", "mm6", "mm7"
+  #endif
+#define NOT_USE_ASM 0
+#else
+#define NOT_USE_ASM 1
+#endif
+
+#if PLATFORM_LITTLEENDIAN
+	#define BYTESWAP(x)
+#else
+// TODO: DG: the following stuff could probably be updated to use the functions above properly,
+//       which should make lots of cases easier. As I don't have a big endian machine I can't test,
+//       so I won't touch this for now.
+
+    static inline void BYTESWAP(UWORD &val)
+    {
+        #if __POWERPC__
+        __asm__ __volatile__ (
+            "lhbrx %0,0,%1"
+                : "=r" (val)
+                : "r" (&val)
+                );
+        #else
+        val = BYTESWAP16_unsigned(val);
+        #endif
+    }
+
+    static inline void BYTESWAP(SWORD &val)
+    {
+        // !!! FIXME: reinterpret_cast ?
+        UWORD uval = *((UWORD *) &val);
+        BYTESWAP(uval);
+        val = *((SWORD *) &uval);
+    }
+
+    static inline void BYTESWAP(ULONG &val)
+    {
+        #if __POWERPC__
+        __asm__ __volatile__ (
+            "lwbrx %0,0,%1"
+                : "=r" (val)
+                : "r" (&val)
+        );
+        #else
+        val = BYTESWAP32_unsigned(val);
+        #endif
+    }
+
+    static inline void BYTESWAP(SLONG &val)
+    {
+        // !!! FIXME: reinterpret_cast ?
+        ULONG uval = *((ULONG *) &val);
+        BYTESWAP(uval);
+        val = *((SLONG *) &uval);
+    }
+
+    static inline void BYTESWAP(BOOL &val)
+    {
+        // !!! FIXME: reinterpret_cast ?
+        ULONG uval = *((ULONG *) &val);
+        BYTESWAP(uval);
+        val = *((BOOL *) &uval);
+    }
+
+    static inline void BYTESWAP(FLOAT &val)
+    {
+        // !!! FIXME: reinterpret_cast ?
+        ULONG uval = *((ULONG *) &val);
+        BYTESWAP(uval);
+        val = *((FLOAT *) &uval);
+    }
+
+	static inline void BYTESWAP(__uint64 &val)
+	{
+		ULONG l = (ULONG) (val & 0xFFFFFFFF);
+		ULONG h = (ULONG) ((val >> 32) & 0xFFFFFFFF);
+        BYTESWAP(l);
+        BYTESWAP(h);
+	    val = ( (((__uint64) (l)) << 32) |
+		         ((__uint64) (h)) );
+	}
+
+    static inline void BYTESWAP(__int64 &val)
+    {
+        // !!! FIXME: reinterpret_cast ?
+        __uint64 uval = *((__uint64 *) &val);
+        BYTESWAP(uval);
+        val = *((__int64 *) &uval);
+    }
+
+    static inline void BYTESWAP(DOUBLE &val)
+    {
+        // !!! FIXME: reinterpret_cast ?
+        __uint64 uval = *((__uint64 *) &val);
+        BYTESWAP(uval);
+        val = *((DOUBLE *) &uval);
+    }
+#endif
+
+#if defined(_MSC_VER) && defined(PLATFORM_32BIT)
+#define __MSVC_INLINE__
+#endif
+// ###########################################################################
+
+
 typedef union FastSqrtUnion
 {
 	float f;
