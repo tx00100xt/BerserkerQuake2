@@ -49,8 +49,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#if defined(__APPLE__)
+#include <OpenGL/gl.h>
+#include <OpenGL/glext.h>
+#else
 #include <GL/gl.h>
 #include <GL/glext.h>
+#endif
 #include <png.h>
 #include <SDL2/SDL.h>
 #include "unpak.h"
@@ -2245,6 +2250,22 @@ typedef struct
 # define BERS_ARCH_STR		"x86_64"
 #elif defined(_WIN32)
 # define BERS_ARCH_STR		"x86"
+#elif defined(mips) || defined(__mips__) || defined(__mips)
+# define BERS_ARCH_STR		"mips"
+#elif defined(__s390x__) || defined(__s390__)
+# define BERS_ARCH_STR		"s390"
+#elif defined(_powerpc)  || defined(__powerpc__)  || defined(__powerpc64__)  || defined(__POWERPC__)  || defined(__ppc__)
+# define BERS_ARCH_STR		"POWERPC"
+#elif defined(__loongarch_lp64) || defined(__loongarch_double_float) || defined(__loongarch_single_float) || defined(__loongarch_soft_float)
+# define BERS_ARCH_STR		"loongarch"
+#elif defined(__arm__) || defined(_M_ARM)
+# define BERS_ARCH_STR		"ARM"
+#elif ddefined(__aarch64__) 
+# define BERS_ARCH_STR		"aarch64"
+#elif defined(__riscv) && (__riscv_xlen == 64)
+# define BERS_ARCH_STR		"RISCV"
+#elif defined(__e2k__)
+# define BERS_ARCH_STR		"e2k"
 #else
 # define BERS_ARCH_STR		"unknown"
 #endif

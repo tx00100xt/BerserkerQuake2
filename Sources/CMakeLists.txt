@@ -1,11 +1,10 @@
 cmake_minimum_required(VERSION 3.10)
 project(berserkerq2 LANGUAGES C)
 
+
 ##################################
 ###      Options section       ###
 ##################################
-
-cmake_policy(SET CMP0177 NEW)
 
 # Use system SDL2 is on by default
 option(USE_SYSTEM_SDL2 "Use systems sdl2 development files" On)
@@ -42,6 +41,18 @@ endif()
 if(CMAKE_SYSTEM_NAME STREQUAL "FreeBSD" OR CMAKE_SYSTEM_NAME STREQUAL "OpenBSD" OR CMAKE_SYSTEM_NAME STREQUAL "NetBSD")
     set(FREEBSD TRUE)
 endif()
+if(APPLE)
+    set(MACOSX TRUE)
+    if(CMAKE_GENERATOR STREQUAL "Unix Makefiles")
+      set(RPATH_SETTINGS "-rpath,$ORIGIN")
+      message(STATUS "Using cmake generator 'Unix Makefiles'")
+    elseif(CMAKE_GENERATOR STREQUAL "Ninja")
+      set(RPATH_SETTINGS "-rpath=/tmp")     
+      message(STATUS "Using cmake generator 'Ninja'")
+    else()
+        message(FATAL_ERROR "Unknown cmake generator")
+    endif()
+endif()
 
 # Build type
 if(NOT CMAKE_BUILD_TYPE)
@@ -63,6 +74,12 @@ endif()
 
 if(LINUX)
     set(CMAKE_OS_NAME "GNU/Linux" CACHE STRING "Operating system name" FORCE)
+    file(READ "/etc/os-release" OS_RELEASE)
+    if(OS_RELEASE MATCHES "ID=alpine")
+      message(STATUS "Alpine Linux detected")
+      set(CMAKE_OS_NAME "Alpine" CACHE STRING "Operating system name" FORCE)
+    endif()
+
     ## Check for Debian GNU/Linux
     find_file(DEBIAN_FOUND debian_version debconf.conf
         PATHS /etc
@@ -121,6 +138,13 @@ if(LINUX)
         endif(UBUNTU_FOUND)
       endif(UBUNTU_EXTRA)      
     endif(DEBIAN_FOUND)
+    include(CheckIncludeFile)
+    CHECK_INCLUDE_FILE(/opt/vc/include/bcm_host.h BCMHOST)
+    if(BCMHOST)
+      set(CMAKE_OS_NAME "RPIOS" CACHE STRING "Operating system name" FORCE)
+      set(RPIOS TRUE) 
+      set(DEBIAN_FOUND TRUE)
+     endif()
 endif(LINUX)
 
 if(FREEBSD)
@@ -193,7 +217,7 @@ find_package(OpenGL)
 if(OpenGL_FOUND)
   message(STATUS "...OpenGL library found")
   include_directories(${OpenGL_INCLUDE_DIRS})
-  if(NOT FREEBSD)
+  if(NOT FREEBSD AND NOT CMAKE_OS_NAME STREQUAL "Alpine" AND NOT CMAKE_OS_NAME STREQUAL "RPIOS" AND NOT MACOSX AND NOT RPIOS)
     set(OpenGL_LIBS OpenGL::OpenGL)
   else()
     set(OpenGL_LIBS OpenGL::GL)
@@ -367,7 +391,7 @@ set(CMAKE_ADD_TARGET_DIR "${CMAKE_SOURCE_DIR}/../")
 ### End Compiler flags section ###
 ##################################
 
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID MATCHES "AppleClang")
 	# This section and the like are for flags/defines that can be shared between 
 	# c and c++ compile options
 	add_compile_options(-Wall)
@@ -502,6 +526,9 @@ set(GAMELIB "game")
     add_library(${GAMELIB} SHARED
         game.c
 )
+if(MACOSX)
+    target_link_libraries(${GAMELIB} "-undefined dynamic_lookup")
+endif()
 
 add_executable(berserkerq2
     main.c
@@ -514,6 +541,14 @@ add_executable(berserkerq2
 ##################################
 ###       Link section         ###
 ##################################
+
+if(MACOSX)
+    if(NOT USE_SYSTEM_SDL2)
+	  find_library(COCOA_FRAMEWORK Cocoa)
+      target_link_libraries(berserkerq2 "${COCOA_FRAMEWORK}")
+      target_link_libraries(berserkerq2 "${CMAKE_CURRENT_SOURCE_DIR}/lib/macosx/libSDL2-2.0.0.dylib")
+    endif()
+endif()
 
 target_link_libraries(berserkerq2 ${GAMELIB})
 set_target_properties(berserkerq2 PROPERTIES LINK_FLAGS "-Wl,${RPATH_SETTINGS}")
