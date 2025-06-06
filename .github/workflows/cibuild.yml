@@ -133,7 +133,7 @@ jobs:
           cp -fr modelist.txt x64
           cp -fr baseq2/purepaks.lst x64/baseq2
           cp -fr baseq2/default.cfg x64/baseq2
-          tar -cJpvf berserkerq2-${{ steps.date.outputs.time }}-alpine-x86_64-bin.tar.xz
+          tar -cJpvf berserkerq2-${{ steps.date.outputs.time }}-alpine-x86_64-bin.tar.xz x64
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
