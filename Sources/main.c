@@ -31,6 +31,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 #include "defs.h"
 #include "data.h"
+#include <libgen.h>
 
 #ifdef PLATFORM_UNIX
 // ############ Unix variables ###########
@@ -45,6 +46,10 @@ char 	sys_strHomeDirRogueData[2048];
 char 	sys_strHomeDirXatrixData[2048];
 char 	sys_strCurrentDirData[2048];
 // #######################################
+#endif
+
+#if defined(__FreeBSD__)
+#define	F_OK	0
 #endif
 
 #ifndef _WIN32
@@ -1431,7 +1436,7 @@ void S_DecodeOGGtoWAV(const char *intro)
 	ov_callbacks	vorbisCallbacks = {ovc_read, ovc_seek, ovc_close, ovc_tell};
 	ogg_file_buffer_pos = 0;
 
-	FILE	f;		// подставим тупо пустой f, чтоб ogg.lib схавала и не ругалась.
+	FILE	*f;		// подставим тупо пустой f, чтоб ogg.lib схавала и не ругалась.
 	int err = ov_open_callbacks(&f, &vf, NULL, 0, vorbisCallbacks);
 	if (err < 0)
 		Com_Printf("^3WARNING:^7 couldn't open OGG stream (%s), err = %s\n", intro, ogg_error(err));
@@ -88355,10 +88360,10 @@ void Common_Init (int argc, char **argv)
   	// get library path
 #if defined(__OpenBSD__) || defined(__FreeBSD__)
   	if( sys_iSysPath == 1 ) {
-    	strcpy(sys_strLibPath, ((const char *))"/usr/local/lib/berserkerq2/");
+    	strcpy(sys_strLibPath, (const char *)"/usr/local/lib/berserkerq2/");
 #elif defined(__NetBSD__)
   	if( sys_iSysPath == 1 ) {
-		strcpy(sys_strLibPath, ((const char *))"/usr/pkg/lib/berserkerq2/");
+		strcpy(sys_strLibPath, (const char *)"/usr/pkg/lib/berserkerq2/");
 #else
   if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *)"/usr/lib/aarch64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
     strcpy(sys_strLibPath, (const char *)"/usr/lib/aarch64-linux-gnu/berserkerq2/"); 
