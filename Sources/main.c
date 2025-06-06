@@ -48,6 +48,10 @@ char 	sys_strCurrentDirData[2048];
 // #######################################
 #endif
 
+#ifndef BERS_ARCH_STR
+#define BERS_ARCH_STR "ARCH"
+#endif
+
 #if defined(__FreeBSD__)
 #define	F_OK	0
 #endif

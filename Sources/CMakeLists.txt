@@ -371,7 +371,7 @@ set(CMAKE_ADD_TARGET_DIR "${CMAKE_SOURCE_DIR}/../")
 ### End Compiler flags section ###
 ##################################
 
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID MATCHES "AppleClang")
 	# This section and the like are for flags/defines that can be shared between 
 	# c and c++ compile options
 	add_compile_options(-Wall)
