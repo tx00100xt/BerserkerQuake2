@@ -71,8 +71,8 @@ jobs:
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
-        name: berserkerq2--${{ steps.date.outputs.time }}-alpine-x86-bin.tar.xz
-        path: berserkerq2--${{ steps.date.outputs.time }}-alpine-x86-bin.tar.xz
+        name: berserkerq2-${{ steps.date.outputs.time }}-alpine-x86-bin.tar.xz
+        path: berserkerq2-${{ steps.date.outputs.time }}-alpine-x86-bin.tar.xz
 
   build-alpine-64:
     name: Alpine ${{ matrix.Configuration }} ${{ matrix.Platform }}
@@ -133,7 +133,7 @@ jobs:
           cp -fr modelist.txt x64
           cp -fr baseq2/purepaks.lst x64/baseq2
           cp -fr baseq2/default.cfg x64/baseq2
-          tar -cJpvf berserkerq2-${{ steps.date.outputs.time }}-alpine-x86-bin.tar.xz x64
+          tar -cJpvf berserkerq2-${{ steps.date.outputs.time }}-alpine-x86_64-bin.tar.xz
 
     - name: Upload artifact
       uses: actions/upload-artifact@v4
@@ -258,8 +258,8 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: berserkerq2-${{ steps.date.outputs.time }}-bsd-amd64-bin.tar.xz
-          path: berserkerq2-${{ steps.date.outputs.time }}-bsd-amd64-bin.tar.xz
+          name: berserkerq2-${{ steps.date.outputs.time }}-freebsd-amd64-bin.tar.xz
+          path: berserkerq2-${{ steps.date.outputs.time }}-freebsd-amd64-bin.tar.xz
           
   build-raspios-armv7l:
     name: RPi OS Lite ${{ matrix.Configuration }} ${{ matrix.arch }}
