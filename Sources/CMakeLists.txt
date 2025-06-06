@@ -5,12 +5,14 @@ project(berserkerq2 LANGUAGES C)
 ###      Options section       ###
 ##################################
 
+cmake_policy(SET CMP0177 NEW)
+
 # Use system SDL2 is on by default
-set(USE_SYSTEM_SDL2 TRUE)
-set(USE_SYSTEM_ZLIB TRUE)
-set(USE_CCACHE ${USE_CCACHE})
-set(USE_SYSTEM_INSTALL FALSE)
-set(USE_SYSTEM_OGGVORBIS TRUE)
+option(USE_SYSTEM_SDL2 "Use systems sdl2 development files" On)
+option(USE_SYSTEM_ZLIB "Use systems zlib development files" On)
+option(USE_CCACHE "Set to ON to use ccache if present in the system" ${USE_CCACHE})
+option(USE_SYSTEM_INSTALL "Install to systems directories" Off)
+option(USE_SYSTEM_OGGVORBIS "Use systems ogg vorbis vorbisfile development files" On)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 include(CheckCCompilerFlag)
@@ -61,12 +63,6 @@ endif()
 
 if(LINUX)
     set(CMAKE_OS_NAME "GNU/Linux" CACHE STRING "Operating system name" FORCE)
-    file(READ "/etc/os-release" OS_RELEASE)
-    if(OS_RELEASE MATCHES "ID=alpine")
-      message(STATUS "Alpine Linux detected")
-      set(CMAKE_OS_NAME "Alpine" CACHE STRING "Operating system name" FORCE)
-    endif()
-
     ## Check for Debian GNU/Linux
     find_file(DEBIAN_FOUND debian_version debconf.conf
         PATHS /etc
@@ -197,7 +193,7 @@ find_package(OpenGL)
 if(OpenGL_FOUND)
   message(STATUS "...OpenGL library found")
   include_directories(${OpenGL_INCLUDE_DIRS})
-  if(NOT FREEBSD AND NOT CMAKE_OS_NAME STREQUAL "Alpine")
+  if(NOT FREEBSD)
     set(OpenGL_LIBS OpenGL::OpenGL)
   else()
     set(OpenGL_LIBS OpenGL::GL)
@@ -371,7 +367,7 @@ set(CMAKE_ADD_TARGET_DIR "${CMAKE_SOURCE_DIR}/../")
 ### End Compiler flags section ###
 ##################################
 
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID MATCHES "AppleClang")
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
 	# This section and the like are for flags/defines that can be shared between 
 	# c and c++ compile options
 	add_compile_options(-Wall)
