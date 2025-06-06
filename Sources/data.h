@@ -853,6 +853,7 @@ int	gl_tex_alpha_format = 4;
 int	gl_filter_min = GL_LINEAR_MIPMAP_NEAREST;
 int	gl_filter_max = GL_LINEAR;
 
+
 PFNGLGENBUFFERSARBPROC					glGenBuffersARB = NULL;
 PFNGLBINDBUFFERARBPROC					glBindBufferARB = NULL;
 PFNGLBUFFERDATAARBPROC					glBufferDataARB = NULL;

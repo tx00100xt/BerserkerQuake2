@@ -1,4 +1,5 @@
 # Berserker@Quake2 Engine
+[![Build status](https://github.com/tx00100xt/SeriousSamClassic/actions/workflows/cibuild.yml/badge.svg)](https://github.com/tx00100xt/BerserkerQuake2/actions/)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/tx00100xt/BerserkerQuake2)](https://github.com/tx00100xt/BerserkerQuake2/releases/tag/1.45.1-beta1)
 [![Github downloads](https://img.shields.io/github/downloads/tx00100xt/BerserkerQuake2/total.svg?logo=github&logoColor=white&style=flat-square&color=E75776)](https://github.com/tx00100xt/BerserkerQuake2/releases/)
@@ -178,5 +179,23 @@ Supported Architectures
 Supported OS
 -----------
 * `Linux`
+* `FreeBSD`
 * `OpenBSD`
+* `Raspberry PI OS`
+
+### Build status
+|CI|Platform|Compiler|Configurations|Platforms|Status|
+|---|---|---|---|---|---|
+|GitHub Actions|Ubuntu, FreeBSD, Alpine, Raspberry PI OS Lite|GCC, Clang|Release|x86, x64, armv7l, aarch64, riscv64, ppc64le, s390x, mipsel, loongarch64|![GitHub Actions Build Status](https://github.com/tx00100xt/BerserkerQuake2/actions/workflows/cibuild.yml/badge.svg)
+
+You can download a the automatically build based on the latest commit.  
+To do this, go to the [Actions tab], select the top workflows, and then Artifacts.
+
+License
+-------
+
+* BerserkerQuake2 is licensed under the GNU GPL v2 (see LICENSE file).
+* BerserkerQuake2 extra data game content is licensed under the GNU GPL v2 (see LICENSE file).
+
+[Actions tab]: https://github.com/tx00100xt/BerserkerQuake2/actions "Download Artifacts"
 
