@@ -1,0 +1,11 @@
+Put this libs (x86):
+====================
+SDL2.lib
+SDL2main.lib
+jpeg8.lib
+libpng16.lib
+libvorbis.lib
+libvorbisfile.lib
+zlib.lib
+====================
+ here.

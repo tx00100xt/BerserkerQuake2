@@ -907,7 +907,7 @@ typedef struct
 
 #define	ICON_WIDTH	24
 #define	ICON_HEIGHT	24
-#define	CHAR_WIDTH	16
+#define	Q2_CHAR_WIDTH	16
 #define	ICON_SPACE	8
 #define STAT_MINUS		10	// num frame for '-' stats digit
 

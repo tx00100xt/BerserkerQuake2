@@ -1,18 +1,70 @@
 /*
-	unpak.c			Copyright (C) 1998-2000 Vitaly Ovtchinnikov
-										and Damir Sagidullin
+===========================================================================
+Copyright (C) 1997-2001 Id Software, Inc.
+Copyright (C) 1998-2000 Vitaly Ovtchinnikov, Damir Sagidullin
+Copyright (C) 2004-2014 Serge Borodulin aka Berserker (tm)
+                         <http://berserker.quakegate.ru>
+
+This file is part of Berserker@Quake2 source code.
+
+Berserker@Quake2 source code is free software; you can redistribute it
+and/or modify it under the terms of the GNU General Public License as
+published by the Free Software Foundation; either version 2 of the License,
+or (at your option) any later version.
+
+Berserker@Quake2 source code is distributed in the hope that it will be
+useful, but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Berserker@Quake2 source code; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+===========================================================================
 */
 
+#include <libgen.h>
+#include <string.h>
+#include "main.h"
 #include "unpak.h"
+
+extern int 		sys_iSysDataPath;
+extern int 		sys_iHomeDataPath;
+extern char 	sys_strHomeDirData[2048];
 
 int		PackFileOpen (zipfile_t *pf)
 {
 	uLong			x, max;
 	unz_file_info	file_info;
+	char			openfile[2048];
 
-	pf->uf = unzOpen (pf->pak_name);
+#ifndef _WIN32
+	for( int i=0; i<2048; i++) {
+		openfile[i] = 0;
+	}
+	// TODO: add xatrix, rogue
+    if (sys_iSysDataPath == 1) { // use system installed game data
+#if defined(FREEBSD)
+		strcpy(openfile,(const char *) "/usr/local/share/berserkerq2");
+		strcat(openfile,(const char *) pf->pak_name + 1);
+#else
+		strcpy(openfile,(const char *) "/usr/share/berserkerq2");
+		strcat(openfile,(const char *) pf->pak_name + 1);
+#endif
+	} else if (sys_iHomeDataPath == 1) { // use home installed game data
+		strcpy(openfile, (const char *) sys_strHomeDirData);
+		strcat(openfile, (const char *) pf->pak_name + 1);
+	} else {
+		// nothing... current game dir
+		strcat(openfile,(const char *)pf->pak_name);
+	}
+#else // FREEBSD
+	strcat(openfile,(const char *)pf->pak_name);
+#endif // NOT win32
+	pf->uf = unzOpen ((const char *)openfile);
 	if (!pf->uf)
 		return 0;
+
 	unzGetGlobalInfo (pf->uf, &pf->gi);
 	pf->fi = (fileinfo_t *)Z_Malloc (sizeof(fileinfo_t)*pf->gi.number_entry, false);
 	if (!pf->fi)
@@ -76,7 +128,6 @@ int		PackFileGet (zipfile_t *pf, char *fname, char **buf, unsigned hash)
 		*buf = NULL;
 		return -2;
 	}
-
 	return pf->fi[num].size;
 }
 

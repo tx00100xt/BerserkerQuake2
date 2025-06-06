@@ -1570,21 +1570,24 @@ void M_MoveFrame (edict_t *self)
 			if (!(self->monsterinfo.aiflags & AI_HOLD_FRAME))
 			{
 				self->s.frame++;
-				if (self->s.frame > move->lastframe)
+				if (self->s.frame > move->lastframe) {
 					self->s.frame = move->firstframe;
+				}
 			}
 		}
 	}
 
 	index = self->s.frame - move->firstframe;
-	if (move->frame[index].aifunc)
-		if (!(self->monsterinfo.aiflags & AI_HOLD_FRAME))
+	if (move->frame[index].aifunc) {
+		if (!(self->monsterinfo.aiflags & AI_HOLD_FRAME)) {
 			move->frame[index].aifunc (self, move->frame[index].dist * self->monsterinfo.scale);
-		else
+		} else {
 			move->frame[index].aifunc (self, 0);
-
-	if (move->frame[index].thinkfunc)
+		}	
+	}
+	if (move->frame[index].thinkfunc) {
 		move->frame[index].thinkfunc (self);
+	}
 }
 
 
@@ -2184,21 +2187,25 @@ bool ai_checkattack (edict_t *self, float dist)
 // this causes monsters to run blindly to the combat point w/o firing
 	if (self->goalentity)
 	{
-		if (self->monsterinfo.aiflags & AI_COMBAT_POINT)
+		if (self->monsterinfo.aiflags & AI_COMBAT_POINT) {
 			return false;
+		}
 
-		if (self->monsterinfo.aiflags & AI_SOUND_TARGET)
+		if ((self->monsterinfo.aiflags) & AI_SOUND_TARGET)
 		{
-			if ((level.time - self->enemy->teleport_time) > 5.0)
+			if ((level.time - (self->enemy->teleport_time)) > 5.0)
 			{
-				if (self->goalentity == self->enemy)
-					if (self->movetarget)
+				if ((self->goalentity) == (self->enemy)) {
+					if (self->movetarget) {
 						self->goalentity = self->movetarget;
-					else
+					} else {
 						self->goalentity = NULL;
+					}
+				}
 				self->monsterinfo.aiflags &= ~AI_SOUND_TARGET;
-				if (self->monsterinfo.aiflags & AI_TEMP_STAND_GROUND)
+				if (self->monsterinfo.aiflags & AI_TEMP_STAND_GROUND) {
 					self->monsterinfo.aiflags &= ~(AI_STAND_GROUND | AI_TEMP_STAND_GROUND);
+				}
 			}
 			else
 			{
@@ -13911,13 +13918,14 @@ void Use_Breather (edict_t *ent, gitem_t *item)
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
 
-	if (ent->client->breather_framenum > level.framenum)
+	if (ent->client->breather_framenum > level.framenum) {
 		ent->client->breather_framenum += 300;
-	else
+	} else {
 		ent->client->breather_framenum = level.framenum + 300;
+	}
 
-		ent->client->ps.rdflags |= RDF_BREATHER;	// Включаем эффект breather
-		ent->client->ps.rdflags |= RDF_MASK;
+	ent->client->ps.rdflags |= RDF_BREATHER;	// Включаем эффект breather
+	ent->client->ps.rdflags |= RDF_MASK;
 
 ////	if(!net_compatibility->value)
 ////	{
@@ -17740,29 +17748,31 @@ void P_WorldEffects ()
 	{
 		if (current_player->watertype & CONTENTS_LAVA)
 		{
-			if (current_player->health > 0
-				&& current_player->pain_debounce_time <= level.time
-				&& current_client->invincible_framenum < level.framenum)
+			if ((current_player->health > 0)
+				&& (current_player->pain_debounce_time <= level.time)
+				&& (current_client->invincible_framenum < level.framenum))
 			{
-				if (rand()&1)
+				if (rand()&1) {
 					gi.sound (current_player, CHAN_VOICE, gi.soundindex("player/burn1.wav"), 1, ATTN_NORM, 0);
-				else
+				 } else {
 					gi.sound (current_player, CHAN_VOICE, gi.soundindex("player/burn2.wav"), 1, ATTN_NORM, 0);
-
-					current_client->ps.rdflags |= RDF_BURN;	// Включаем эффект burn
-////				if(!net_compatibility->value)
-////				{
-////					gi.WriteByte (svc_rfx);
-////					gi.WriteByte (RFX_BURN_1_SECOND);	// Включаем эффект горения в течении 1 секунды
-////					gi.unicast (current_player, false);
-////				}
+				}
+				
+				current_client->ps.rdflags |= RDF_BURN;	// Включаем эффект burn
+////			if(!net_compatibility->value)
+////			{
+////				gi.WriteByte (svc_rfx);
+////				gi.WriteByte (RFX_BURN_1_SECOND);	// Включаем эффект горения в течении 1 секунды
+////				gi.unicast (current_player, false);
+////			}
 				current_player->pain_debounce_time = level.time + 1;
 			}
 
-			if (envirosuit)	// take 1/3 damage with envirosuit
+			if (envirosuit)	{// take 1/3 damage with envirosuit
 				T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 1*waterlevel, 0, 0, MOD_LAVA);
-			else
+			} else {
 				T_Damage (current_player, world, world, vec3_origin, current_player->s.origin, vec3_origin, 3*waterlevel, 0, 0, MOD_LAVA);
+			}		
 		}
 
 		if (current_player->watertype & CONTENTS_SLIME)
@@ -23557,21 +23567,24 @@ void MakronHyperblaster (edict_t *self)
 void makron_pain (edict_t *self, edict_t *other, float kick, int damage)
 {
 
-	if (self->health < (self->max_health / 2))
+	if (self->health < (self->max_health / 2)) {
 			self->s.skinnum = 1;
-
-	if (level.time < self->pain_debounce_time)
+	}
+	if (level.time < self->pain_debounce_time) {
 			return;
+	}
 
 	// Lessen the chance of him going into his pain frames
-	if (damage <=25)
-		if (random()<0.2)
+	if (damage <=25) {
+		if (random()<0.2) {
 			return;
+		}
+	}
 
 	self->pain_debounce_time = level.time + 3;
-	if (skill->value == 3)
+	if (skill->value == 3) {
 		return;		// no pain anims in nightmare
-
+	}
 
 	if (damage <= 40)
 	{
@@ -28409,24 +28422,30 @@ void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
 //	if (self->health < (self->max_health / 2))
 //		self->s.skinnum = 1;
 
-	if (level.time < self->pain_debounce_time)
+	if (level.time < self->pain_debounce_time) {
 		return;
-
+	}
 	self->pain_debounce_time = level.time + 3;
 
 	r = 1 + (rand()&1);
-	if (self->health < 25)
+	if (self->health < 25) {
 		l = 25;
-	else if (self->health < 50)
+	}
+	else if (self->health < 50) {
 		l = 50;
-	else if (self->health < 75)
+	}
+	else if (self->health < 75) {
 		l = 75;
-	else
+	}
+	else {
 		l = 100;
+	}
+
 	gi.sound (self, CHAN_VOICE, gi.soundindex (va("player/male/pain%i_%i.wav", l, r)), 1, ATTN_IDLE, 0);
 
-	if (skill->value == 3)
+	if (skill->value == 3) {
 		return;		// no pain anims in nightmare
+	}
 
 	// Don't go into pain frames if crucified.
 	if (self->spawnflags & 8)
@@ -28439,9 +28458,9 @@ void insane_pain (edict_t *self, edict_t *other, float kick, int damage)
 	{
 		self->monsterinfo.currentmove = &insane_move_crawl_pain;
 	}
-	else
+	else {
 		self->monsterinfo.currentmove = &insane_move_stand_pain;
-
+	}
 }
 
 void insane_onground (edict_t *self)

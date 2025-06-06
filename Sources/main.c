@@ -32,6 +32,20 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "defs.h"
 #include "data.h"
 
+#ifdef PLATFORM_UNIX
+// ############ Unix variables ###########
+int		sys_iSysPath = 0;
+int 	sys_iSysDataPath = 0;
+int 	sys_iHomeDataPath = 0;
+int 	sys_iCurrentDataPath = 0;
+char 	sys_strLibPath[2048];
+char 	sys_strHomeDirData[2048];
+char 	sys_strHomeDirBaseq2Data[2048];
+char 	sys_strHomeDirRogueData[2048];
+char 	sys_strHomeDirXatrixData[2048];
+char 	sys_strCurrentDirData[2048];
+// #######################################
+#endif
 
 #ifndef _WIN32
 char *strlwr(char *str)
@@ -2949,19 +2963,166 @@ char *FS_GetError(errno_t err)
 }
 #endif
 
+const char *get_filename_ext(const char *filename) {
+    const char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}
+
 FILE *FS_Fopen(const char *name, const char *mode)
 {
 	FILE	*file;
+	char	openfile[2048];
+	char	openfile_ext[2048];
+
 #ifndef _WIN32
-	file = fopen (name, mode);
+	for( int i=0; i<2048; i++) {
+		openfile[i] = 0;
+		openfile_ext[i] = 0;
+	}
+	// get file extension
+	strcpy(openfile_ext, get_filename_ext((const char *)name));
+
+	// Open pak, pk2 files
+	if ((strcmp((const char *)openfile_ext,(const char *)"pak") == 0) || (strcmp((const char *)openfile_ext,(const char *)"pk2") == 0)) {
+    	if (sys_iSysDataPath == 1) { // use system installed game data
+#if defined(FREEBSD)
+			strcpy(openfile,(const char *)"/usr/local/share/berserkerq2/baseq2/");
+			strcat(openfile,(const char *)basename(name));
+#else
+			strcpy(openfile,(const char *)"/usr/share/berserkerq2/baseq2/");
+			strcat(openfile,(const char *)basename(name));
+#endif
+		} else if (sys_iHomeDataPath == 1) { // use home installed game data
+			strcpy(openfile,(const char *)sys_strHomeDirBaseq2Data);
+			strcat(openfile,(const char *)"/");
+			strcat(openfile,(const char *)basename(name));
+		} else {
+			// nothing... current game dir
+			strcpy(openfile,(const char *)name);
+		}
+	} else if (strcmp((const char *)basename(name),(const char *)"purepaks.lst") == 0) { // Open purepaks.lst
+    	if (sys_iSysDataPath == 1) { // use system installed game data
+#if defined(FREEBSD)
+			strcpy(openfile,(const char *)"/usr/local/share/berserkerq2/baseq2/");
+			strcat(openfile,(const char *)basename(name));
+#else
+			strcpy(openfile,(const char *)"/usr/share/berserkerq2/baseq2/");
+			strcat(openfile,(const char *)basename(name));
+#endif
+		}
+		if( access((const char *)openfile, F_OK) == 0 ) {
+			// nothing... was printf to debug
+		} else {
+			for( int i=0; i<2048; i++) {
+				openfile[i] = 0;
+			}
+			strcpy(openfile,(const char *)sys_strHomeDirBaseq2Data);
+			strcat(openfile,(const char *)"/");
+			strcat(openfile,(const char *)basename(name));
+			if( access((const char *)openfile, F_OK) == 0 ) {
+				// nothing... was printf to debug
+			} else {
+				for( int i=0; i<2048; i++) {
+					openfile[i] = 0;
+				}
+				// nothing... current game dir
+				strcpy(openfile,(const char *)name);
+			}
+		}
+	} else if (strcmp((const char *)basename(name),(const char *)"modelist.txt") == 0) { // Open modelist.txt
+#if defined(FREEBSD)
+		strcpy(openfile,(const char *)"/usr/local/share/berserkerq2/");
+		strcat(openfile,(const char *)basename(name));
+#else
+		strcpy(openfile,(const char *)"/usr/share/berserkerq2/");
+		strcat(openfile,(const char *)basename(name));
+#endif
+
+		if( access((const char *)openfile, F_OK) == 0 ) {
+			// nothing... was printf to debug
+		} else {
+			for( int i=0; i<2048; i++) {
+				openfile[i] = 0;
+			}
+			strcpy(openfile,(const char *)sys_strHomeDirData);
+			strcat(openfile,(const char *)"/");
+			strcat(openfile,(const char *)basename(name));
+			if( access((const char *)openfile, F_OK) == 0 ) {
+				// nothing... was printf to debug
+			} else {
+				for( int i=0; i<2048; i++) {
+					openfile[i] = 0;
+				}
+				strcpy(openfile,(const char *)name);
+			}
+		}
+	} else if ((strncmp((const char *)name,(const char *)"./baseq2/video/", (size_t) 15) == 0) || \
+		(strncmp((const char *)name,(const char *)"./rogue/video/", (size_t) 14) == 0) ||
+		(strncmp((const char *)name,(const char *)"./xatrix/video/", (size_t) 15) == 0)) { // Open videos
+		if (sys_iSysDataPath == 1) { // use system installed game data
+#if defined(FREEBSD)
+			strcpy(openfile,(const char *)"/usr/local/share/berserkerq2");
+			strcat(openfile,(const char *) name + 1);
+#else
+			strcpy(openfile,(const char *)"/usr/share/berserkerq2");
+			strcat(openfile,(const char *) name + 1);
+#endif
+		} else if (sys_iHomeDataPath == 1) { // use home installed game data
+			strcpy(openfile,(const char *)sys_strHomeDirData);
+			strcat(openfile,(const char *) name + 1);
+		} else {
+			// nothing... current game dir
+			strcpy(openfile,(const char *)name);
+		}
+	} else if (strcmp((const char *)basename(name),(const char *)"q2b_config.cfg") == 0) {
+       	if(strncmp((const char *)name, (const char *)"./baseq2/", (size_t) 9) == 0){
+			strcpy(openfile,(const char *)sys_strHomeDirBaseq2Data);
+			strcat(openfile,(const char *)"/");
+			strcat(openfile,(const char *)basename(name));
+		} else if(strncmp((const char *)name, (const char *)"./rogue/", (size_t) 8 ) == 0){
+			strcpy(openfile,(const char *)sys_strHomeDirRogueData);
+			strcat(openfile,(const char *)"/");
+			strcat(openfile,(const char *)basename(name));
+		} else if(strncmp((const char *)name, (const char *)"./xatrix/", (size_t) 9 ) == 0){
+			strcpy(openfile,(const char *)sys_strHomeDirXatrixData);
+			strcat(openfile,(const char *)"/");
+			strcat(openfile,(const char *)basename(name));
+    	} else {
+			strcpy(openfile,(const char *)sys_strHomeDirBaseq2Data);
+			strcat(openfile,(const char *)"/");
+			strcat(openfile,(const char *)basename(name));
+		}
+	} else if((strncmp((const char *)name, (const char *)"./baseq2/cache/", (size_t) 15) == 0) || \
+		(strncmp((const char *)name, (const char *)"./rogue/cache/", (size_t) 14) == 0) || \
+		(strncmp((const char *)name, (const char *)"./xatrix/cache/", (size_t) 15) == 0)) {
+
+			strcpy(openfile, (const char *) sys_strHomeDirData);
+			strcat(openfile, (const char *) name + 1);
+	} else if((strncmp((const char *)name, (const char *)"./baseq2/save.q2b/", (size_t) 18) == 0) || \
+		(strncmp((const char *)name, (const char *)"./rogue/save.q2b/", (size_t) 17) == 0) || \
+		(strncmp((const char *)name, (const char *)"./xatrix/save.q2b/", (size_t) 18) == 0)) {
+
+			strcpy(openfile,(const char *) sys_strHomeDirData);
+			strcat(openfile,(const char *) name + 1);
+	} else {
+		// nothing... current game dir
+		strcpy(openfile,(const char *)name);	
+	}
+
+	file = fopen ((const char *)openfile, mode);
 	if (!file)
 	{
-		if (errno != ENOENT)
+		if (errno != ENOENT) {
 			Com_DPrintf("FS_Fopen(\"%s\", \"%s\"): %s\n", name, mode, strerror(errno));
+			printf("FS_Fopen: file->[%s], Failed!!! mode=[%s] err=[%s]\n", (const char *)openfile, (const char *)mode, (const char *)strerror(errno));
+		}
 	}
-#else
+
+#else // win32
 	errno_t	err;
 	char	*mess;
+
 	err = fopen_s(&file, name, mode);
 	if (err == ENOENT)
 		mess = NULL;		// Berserker: отсутствие файла - обычное дело, не будем спамить!
@@ -4281,6 +4442,7 @@ void GL_ScreenShot_f ()
 
 	// create the screenshots directory if it doesn't exist
 	Com_sprintf (checkname, sizeof(checkname), "%s/screenshots", FS_Gamedir());
+	//printf("GL_ScreenShot_f: Create... [%s]\n", (const char *)checkname);
 	_mkdir (checkname);
 
 	if (!Q_strcasecmp(Cmd_Argv(1), "png"))
@@ -6451,15 +6613,19 @@ void ApplyChanges( void *unused )
 	Cvar_Set( "r_texturealphamode", (char *)alphas[s_alpha_list.curvalue] );
 	Cvar_ForceSetValue( "r_diffuse_compression", s_compression_box.curvalue );
 	Cvar_ForceSetValue( "r_bump_compression", s_bump_compression_box.curvalue );
-	if(s_anisotropy_slider.curvalue >= 2)
+	if(s_anisotropy_slider.curvalue >= 2) {
 		Cvar_SetValue( "r_anisotropy", pow(2.0, s_anisotropy_slider.curvalue-1.0) );
-	else
+	} else {
 		Cvar_SetValue( "r_anisotropy", 0 );
-	if (gl_config.arb_multisample)
-		if(s_antialias_slider.curvalue > 1)
+	}
+
+	if (gl_config.arb_multisample) {
+		if(s_antialias_slider.curvalue > 1) {
 			Cvar_ForceSetValue( "r_multiSamples", pow(2.0, s_antialias_slider.curvalue-1.0) );
-		else
+		} else {
 			Cvar_ForceSetValue( "r_multiSamples", 1 );
+		}
+	}
 
 	/*
 	** update appropriate stuff if we're running OpenGL has been modified
@@ -9630,22 +9796,18 @@ void R_LoadScreenImages()
 	glfx_mask = GL_FindImage ("pics/effects/mask.tga", it_fx, true, 0, false, 0);
 	if (!glfx_mask) {
 		Com_Printf("^1Can't find pic: pics/effects/mask.tga\n");
-		printf("Can't find pic: pics/effects/mask.tga\n");
 	}
 	glfx_maskenv = GL_FindImage ("pics/effects/maskenv.tga", it_fx, true, 0, false, 0);
 	if (!glfx_maskenv){
 		Com_Printf("^1Can't find pic: pics/effects/maskenv.tga\n");
-		printf("Can't find pic: pics/effects/maskenv.tga\n");
 	}
 	glfx_drown = GL_FindImage ("pics/effects/drown.tga", it_fx, true, 0, false, 0);
 	if (!glfx_drown){
 		Com_Printf("^1Can't find pic: pics/effects/drown.tga\n");
-		printf("Can't find pic: pics/effects/drown.tga\n");
 	}
 	glfx_underwater = GL_FindImage ("pics/effects/underwater.tga", it_fx, true, 0, false, 0);
 	if (!glfx_underwater){
 		Com_Printf("^1Can't find pic: pics/effects/underwater.tga\n");
-		printf("Can't find pic: pics/effects/underwater.tga\n");
 	}
 	for (num_pains=0; num_pains<MAX_RFX_IMAGES; num_pains++)
 		glfx_pain[num_pains] = glfx_burn[num_pains] = NULL;
@@ -9659,7 +9821,6 @@ void R_LoadScreenImages()
 	}
 	if (!num_pains) {
 		Com_Printf("^1Can't find any 'pain' pic\n");
-		printf("Can't find any 'pain' pic\n");
 	}
 	for (num_burns=0; num_burns<MAX_RFX_IMAGES; num_burns++)
 	{
@@ -9670,7 +9831,6 @@ void R_LoadScreenImages()
 	}
 	if (!num_burns) {
 		Com_Printf("^1Can't find any 'burn' pic\n");
-		printf("Can't find any 'burn' pic\n");	
 	}
 }
 
@@ -9681,7 +9841,7 @@ int R_Init()
 	char vendor_buffer[1000];
 	int	err;
 
-	printf("R_Init(): Begin...\n" );
+	printf("R_Init: Begin...\n" );
 	Init_Palette ();
 
 	R_Register();
@@ -9693,10 +9853,10 @@ int R_Init()
 	if ( !R_SetMode () )
 	{
 		Com_Printf("^1R_Init(): could not R_SetMode()\n" );
-		printf("R_Init(): could not R_SetMode()\n" );
+		printf("R_Init: could not R_SetMode()\n" );
 		return -1;
 	}
-	printf("R_Init(): R_SetMode() done.\n" );
+	printf("R_Init: SetMode done.\n\n" );
 
 	// get our various GL strings
 	gl_config.vendor_string = (char*)glGetString (GL_VENDOR);
@@ -9725,7 +9885,7 @@ int R_Init()
 	char *string = (char*)gl_config.extensions_string;
 //	Com_Printf("GL_EXTENSIONS: %s\n", gl_config.extensions_string );	// From old engine...
 	Com_Printf("\nGL_EXTENSIONS:\n--------------\n");
-	printf("\nGL_EXTENSIONS:\n--------------\n");
+	printf("\nGL_EXTENSIONS:  ");
 	char c, line[128];
 	int i;
 	while (1)
@@ -9744,7 +9904,7 @@ int R_Init()
 			break;
 		line[i] = 0;
 		Com_Printf("%s\n", line);
-		printf("%s\n", line);
+		printf("%s  ", line);
 	}
 	Com_Printf("\n");
 	printf("\n");
@@ -9759,20 +9919,20 @@ repeat:
 	if(!GL_SelectShader())
 	{
 		Com_Printf("^1No shaders available!\n");
-		printf("No shaders available!\n");
+		printf("R_Init: No shaders available!\n");
 		if (!r_simple->value)
 		{
 			Cvar_ForceSetValue("r_simple", 1);
 			Com_Printf("^3r_simple forced to 1\n");
-			printf("r_simple forced to 1\n");
+			printf("R_Init: r_simple forced to 1\n");
 			goto repeat;
 		}
 		else {
-			printf("R_Init(): GL_SelectShader() Error!\n");
+			printf("R_Init: GL_SelectShader() Error!\n");
 			return -1;
 		}
 	}
-	printf("R_Init(): GL_SelectShader() done!\n");
+	printf("R_Init: GL_SelectShader() done!\n");
 
 	if(gl_config.anisotropic && r_anisotropy->value)
 		Com_Printf("...using anisotropy: %i\n", (int)r_anisotropy->value);
@@ -9905,10 +10065,10 @@ repeat:
 	if(!Draw_InitFonts ())
 	{
 		Com_Printf("^1X..Error loading font texture\n");
-		printf("X..Error loading font texture\n");
+		printf("R_Init: X..Error loading font texture\n");
 		return -1;
 	}
-	printf("Draw_InitFonts.. loading font texture done.\n");
+	printf("R_Init: Draw_InitFonts() loading font texture done.\n");
 
 	if (gl_config.occlusion)
 	{
@@ -10111,7 +10271,7 @@ void CL_Shutdown()
 
 	if (isdown)
 	{
-		printf ("recursive shutdown\n");
+		printf ("CL_Shutdown: recursive shutdown\n");
 		return;
 	}
 	isdown = true;
@@ -10547,16 +10707,20 @@ void SCR_CalcVrect ()
 {
 	int		size;
 
-	if (!r_simple->value)
-		if (scr_viewsize->value != 100)
+	if (!r_simple->value) {
+		if (scr_viewsize->value != 100) {
 			Cvar_Set("viewsize", "100");
+		}
+	}
 	else
 	{
 		// bound viewsize
-		if (scr_viewsize->value < 40)
+		if (scr_viewsize->value < 40) {
 			Cvar_Set ("viewsize","40");
-		if (scr_viewsize->value > 100)
+		}
+		if (scr_viewsize->value > 100) {
 			Cvar_Set ("viewsize","100");
+		}
 	}
 
 	size = scr_viewsize->value;
@@ -10617,13 +10781,23 @@ Creates any directories needed to store the given filename
 void	FS_CreatePath (char *path)
 {
 	char	*ofs, bak;
-	for (ofs = path+1 ; *ofs ; ofs++)
+	char	_homepath[2048];
+
+	for (int i=0; i<2048 ; i++)	{
+		_homepath[i] = 0;
+	}
+	strcpy(_homepath, (const char*) sys_strHomeDirData);
+	strcat(_homepath, (const char*) path + 1);
+
+	for (ofs = _homepath+1 ; *ofs ; ofs++)
 	{
 		if (*ofs == '/' || *ofs == '\\')		// berserker: damn path names
 		{	// create the directory
 			bak = *ofs;
 			*ofs = 0;
-			_mkdir (path);
+
+
+			_mkdir (_homepath);
 			*ofs = bak;
 		}
 	}
@@ -10786,10 +10960,12 @@ zip_ch:							memcpy(&pf, &ZipCache[i], sizeof(zipfile_t));		// Нашли уж�
 							break;
 						}
 					}
-				}
+				}	
 				strcpy(&ZipCache[slot].pak_name[0], pak->filename);	// Если не нашли zip в кэше, откроем его...
-				if (!PackFileOpen (&ZipCache[slot]))
+				if (!PackFileOpen (&ZipCache[slot])) {
 					Com_Error(ERR_FATAL, "Error opening pk2-file: %s", pak->filename);
+					printf("FS_FOpenFile: Error opening pk2-file: %s\n", (const char *)pak->filename);
+				}
 				memcpy(&pf, &ZipCache[slot], sizeof(zipfile_t));
 				last_zip_number = slot;
 
@@ -10827,12 +11003,15 @@ clc:			if(test)
 						if (!b_stricmp (pak->files[i].name, filename))
 						{	// found it!
 							file_from_pak = 1;
-							if(!test)
+							if(!test) {
 								Com_DPrintf ("PakFile: %s : %s\n", pak->filename, filename);
+							}
 							// open a new file on the pakfile
 							*file = FS_Fopen (pak->filename, "rb");
-							if (!*file)
+							if (!*file) {
 								Com_Error (ERR_FATAL, "Couldn't reopen %s", pak->filename);
+								printf ("FS_FOpenFile: Error! Couldn't reopen %s", (const char *)pak->filename);
+							}
 							fseek (*file, pak->files[i].filepos, SEEK_SET);
 							return pak->files[i].filelen;
 						}
@@ -10936,20 +11115,22 @@ int FS_LoadFile (char *path, void **buffer)
 	bool	ovr = (fs_cache_number >= MAX_FILES);
 	bool	tst = (buffer == NULL);
 
-	if (ovr)
+	if (ovr) {
 		Com_DPrintf("FS_LoadFile: MAX_FILES = %i overflow\n", MAX_FILES);
+	}
 
 	buf = NULL;	// quiet compiler warning
 	h = NULL;
 	unsigned	hash = Com_HashKey(path);
 
 	// look for it (в кэш-списке файлов)
-	for (i=0 ; i<fs_cache_number ; i++)
-		if (fs_cache[i].hash == hash)
+	for (i=0 ; i<fs_cache_number ; i++) {
+		if (fs_cache[i].hash == hash) {
 			if (!b_stricmp(fs_cache[i].name, path))
 			{	// Нашли в кэше!
-				if (tst)
+				if (tst) {
 					return fs_cache[i].len;
+				}
 				else
 				{
 					len = FS_FOpenFile (path, &h, false, fs_cache[i].pak);
@@ -10957,8 +11138,10 @@ int FS_LoadFile (char *path, void **buffer)
 					goto m1;
 				}
 			}
+		}
+	}
 
-// look for it in the filesystem or pack files
+	// look for it in the filesystem or pack files
 	len = FS_FOpenFile (path, &h, tst, -1);
 
 m1:	if (!h && !file_from_pk2 && !file_from_pak)
@@ -13023,7 +13206,7 @@ material_t	*R_RegisterMaterial(char *name)
 	material = R_LoadMaterial(name, matdata, hash);
 	material->framecount = 1;
 	Z_Free (matdata);
-	printf("Register material done...\n");
+	//printf("R_RegisterMaterial: Register material done...\n");
 	return material;
 }
 
@@ -17834,14 +18017,16 @@ void CL_ProcessSustain ()
 
 	for (i=0, s=cl_sustains; i< MAX_SUSTAINS; i++, s++)
 	{
-		if (s->id)
+		if (s->id) {
 			if ((s->endtime >= cl.gameTime) && (cl.gameTime >= s->nextthink))
 			{
 //				Com_Printf ("think %d %d %d\n", cl.time, s->nextthink, s->thinkinterval);
 				s->think (s);
 			}
-			else if (s->endtime < cl.time)
+			else if (s->endtime < cl.time) {
 				s->id = 0;
+			}
+		}
 	}
 }
 
@@ -20561,13 +20746,13 @@ void SCR_DrawField (int x, int y, float scale_x, float scale_y, int color, int w
 		width = 5;
 
 	SCR_AddDirtyPoint (x, y);
-	SCR_AddDirtyPoint (x+(width*CHAR_WIDTH+2)*scale_x, y+23*scale_y);
+	SCR_AddDirtyPoint (x+(width*Q2_CHAR_WIDTH+2)*scale_x, y+23*scale_y);
 
 	Com_sprintf (num, sizeof(num), "%i", value);
 	l = strlen(num);
 	if (l > width)
 		l = width;
-	x += (2 + CHAR_WIDTH*(width - l))*scale_x;
+	x += (2 + Q2_CHAR_WIDTH*(width - l))*scale_x;
 
 	ptr = num;
 	while (*ptr && l)
@@ -20578,7 +20763,7 @@ void SCR_DrawField (int x, int y, float scale_x, float scale_y, int color, int w
 			frame = *ptr -'0';
 
 		Draw_PicScaled (x,y,scale_x,scale_y,sb_nums[color][frame]);
-		x += CHAR_WIDTH*scale_x;
+		x += Q2_CHAR_WIDTH*scale_x;
 		ptr++;
 		l--;
 	}
@@ -28651,6 +28836,7 @@ pack_t *FS_LoadPackFile (char *packfile, bool isPK2)
 	FILE			*packhandle;
 	int				numpackfiles;
 	packfile_t		*newfiles;
+	//char 			openfile[2048];
 
 	packhandle = FS_Fopen(packfile, "rb");
 	if (!packhandle)
@@ -28711,12 +28897,15 @@ pack_t *FS_LoadPackFile (char *packfile, bool isPK2)
 				}
 			}
 		}
+
 		if (j != -1)
 		{
 			Com_Printf (", caching... ");
 			strcpy(&ZipCache[j].pak_name[0], packfile);
-			if (!PackFileOpen (&ZipCache[j]))
+			if (!PackFileOpen (&ZipCache[j])) {
+
 				Com_Error(ERR_FATAL, "Error opening pk2-file: %s", packfile);
+			}
 			Com_Printf ("Done (%i files)", PackFileGetFilesNumber(&ZipCache[j]));
 		}
 		Com_Printf ("\n");
@@ -28966,6 +29155,7 @@ int Sys_FindFiles (const char *path, const char *pattern, char **fileList, int m
 	char			searchPath[MAX_OSPATH];
 	char			findPath[MAX_OSPATH];
 	int				fileCount = 0;
+	char			openfile[2048];
 
 #ifdef _WIN32
 	Com_sprintf(searchPath, sizeof(searchPath), "%s/*", path);
@@ -28974,9 +29164,10 @@ int Sys_FindFiles (const char *path, const char *pattern, char **fileList, int m
 #endif
 
 #ifdef _WIN32
-	findHandle = FindFirstFile(searchPath, &findInfo);
-	if (findHandle == INVALID_HANDLE_VALUE)
+	findHandle = FindFirstFile(openfile , &findInfo);
+	if (findHandle == INVALID_HANDLE_VALUE) {
 		return 0;
+	}
 
 	while (findRes)
 	{
@@ -28997,58 +29188,89 @@ int Sys_FindFiles (const char *path, const char *pattern, char **fileList, int m
 		Com_sprintf(findPath, sizeof(findPath), "%s/%s", path, findInfo.cFileName);
 
 		int l = strlen(findPath);
-		for (int j=0 ; j<l ; j++)
+		for (int j=0 ; j<l ; j++) {
 			findPath[j] = tolower(findPath[j]);
+		}
 
 		if (findInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			// Add a directory
-			if (addDirs && (fileCount < maxFiles))
+			if (addDirs && (fileCount < maxFiles)) {
 				fileList[fileCount++] = CopyString(findPath);
+			}
 		}
 		else
 		{
 			// Add a file
-			if (addFiles && (fileCount < maxFiles))
+			if (addFiles && (fileCount < maxFiles)) {
 				fileList[fileCount++] = CopyString(findPath);
+			}
 		}
 
 		findRes = FindNextFile(findHandle, &findInfo);
 	}
 
 	FindClose(findHandle);
+#else // End Win32
+
+	for( int i=0; i<2048; i++) {
+		openfile[i] = 0;
+
+	}
+    if (sys_iSysDataPath == 1) { // use system installed game data
+#if defined(FREEBSD)
+		strcpy(openfile,(const char *)"/usr/local/share/berserkerq2/baseq2/");
+		strcat(openfile,(const char *)basename(searchPath));
 #else
-	hFile = scandir(searchPath, &n_file, NULL, NULL);
-	if (hFile == -1)
+		strcpy(openfile,(const char *)"/usr/share/berserkerq2/baseq2/");
+		strcat(openfile,(const char *)basename(searchPath));
+#endif
+	} else if (sys_iHomeDataPath == 1) { // use home installed game data
+		strcpy(openfile,(const char *)sys_strHomeDirBaseq2Data);
+		strcat(openfile,(const char *)"/");
+		strcat(openfile,(const char *)basename(searchPath));
+	} else {
+		// nothing... current game dir
+		strcat(openfile,(const char *)searchPath);
+	}
+
+	hFile = scandir(openfile /* searchPath */, &n_file, NULL, NULL);
+	if (hFile == -1){
+		printf("Sys_FindFiles(): scandir hFile returned(-1) path(%s)\n",(const char*)searchPath);
 		return 0;
+	}
 
 	for (int i = 0; i < hFile; i++)
 	{
 		// Check for invalid file name
-		if (n_file[i]->d_name[ strlen( n_file[i]->d_name ) - 1 ] == '.')
+		if (n_file[i]->d_name[ strlen( n_file[i]->d_name ) - 1 ] == '.') {
 			goto end;
-
+		}
 		// Match pattern
-		if (!Q_GlobMatch(pattern, n_file[i]->d_name, false))
+		if (!Q_GlobMatch(pattern, n_file[i]->d_name, false)) {
 			goto end;
+		}
 
 		Com_sprintf(findPath, sizeof(findPath), "%s/%s", path, n_file[i]->d_name);
 
 		int l = strlen(findPath);
-		for (int j = 0; j<l; j++)
+		for (int j = 0; j<l; j++) {
 			findPath[j] = tolower(findPath[j]);
+		}
 
 		if (n_file[i]->d_type == DT_DIR)
 		{
 			// Add a directory
-			if (addDirs && (fileCount < maxFiles))
-				fileList[fileCount++] = CopyString(findPath);
+			if (addDirs && (fileCount < maxFiles)) {
+				fileList[fileCount++] = CopyString(findPath); 
+			}
 		}
 		else
 		{
 			// Add a file
-			if (addFiles && (fileCount < maxFiles))
-				fileList[fileCount++] = CopyString(findPath);
+			if (addFiles && (fileCount < maxFiles)){
+				fileList[fileCount++] = CopyString(findPath); 
+			}
 		}
 	end:
 		free(n_file[i]);
@@ -29058,7 +29280,6 @@ int Sys_FindFiles (const char *path, const char *pattern, char **fileList, int m
 
 	// Sort the list
 	qsort(fileList, fileCount, sizeof(char *), (int (*)(const void *,const void *))Q_SortStrcmp);
-
 	return fileCount;
 }
 
@@ -29078,7 +29299,13 @@ void FS_AddGameDirectory (char *dir)
 	pack_t			*pak;
 	char			*dirFiles[MAX_PACK_FILES];
 
-	strcpy (fs_gamedir, dir);
+	if (sys_iSysDataPath == 1) {
+		strcpy (fs_gamedir, dir);
+	} else if (sys_iHomeDataPath == 1) {
+		strcpy (fs_gamedir, dir);
+	} else {
+		strcpy (fs_gamedir, dir);
+	}
 
 	//
 	// add the directory to the search path
@@ -29088,17 +29315,15 @@ void FS_AddGameDirectory (char *dir)
 	search->next = fs_searchpaths;
 	fs_searchpaths = search;
 
-	// Add any PAK files
+	// Add any PAK files;
 	dirCount = Sys_FindFiles(dir, "*.pak", dirFiles, MAX_PACK_FILES, true, false);
 	for (i = 0; i < dirCount; i++)
 	{
 		pak = FS_LoadPackFile(dirFiles[i], false);
-
 		search = (searchpath_t *) Z_Malloc(sizeof(searchpath_t), true);
 		search->pack = pak;
 		search->next = fs_searchpaths;
 		fs_searchpaths = search;
-
 		Z_Free(dirFiles[i]);
 	}
 	// ... then add any PK2 files
@@ -29106,12 +29331,10 @@ void FS_AddGameDirectory (char *dir)
 	for (i = 0; i < dirCount; i++)
 	{
 		pak = FS_LoadPackFile(dirFiles[i], true);
-
 		search = (searchpath_t *) Z_Malloc(sizeof(searchpath_t), true);
 		search->pack = pak;
 		search->next = fs_searchpaths;
 		fs_searchpaths = search;
-
 		Z_Free(dirFiles[i]);
 	}
 }
@@ -29172,15 +29395,6 @@ void FS_SetGamedir (char *dir)
 	}
 }
 
-
-char		findbase[MAX_OSPATH];
-char		findpath[MAX_OSPATH];
-#ifdef _WIN32
-intptr_t	findhandle;
-#else
-char	findpattern[MAX_OSPATH];
-DIR		*fdir;
-#endif
 
 /*
 ============
@@ -29251,7 +29465,7 @@ static bool CompareAttributes( unsigned found, unsigned musthave, unsigned canth
 static bool CompareAttributes( char *path, char *name, unsigned musthave, unsigned canthave )
 {
 	struct stat st;
-	char fn[MAX_OSPATH];
+	char fn[MAX_OSPATH + 1];
 
 	if (!strcmp(name, ".") || !strcmp(name, ".."))
 		return false;
@@ -29274,6 +29488,15 @@ static bool CompareAttributes( char *path, char *name, unsigned musthave, unsign
 #endif
 
 
+char		findbase[MAX_OSPATH + 1];
+char		findpath[MAX_OSPATH + 1];
+#ifdef _WIN32
+intptr_t	findhandle;
+#else
+char	findpattern[MAX_OSPATH + 1];
+DIR		*fdir;
+#endif
+
 #ifdef _WIN32
 char *Sys_FindFirst ( char *path, unsigned musthave, unsigned canthave )
 {
@@ -29291,7 +29514,7 @@ char *Sys_FindFirst ( char *path, unsigned musthave, unsigned canthave )
 		return NULL;
 	if ( !CompareAttributes( findinfo.attrib, musthave, canthave ) )
 		return ".";		/// was NULL   Berserker: исправим Ку2 баг - если в череде нахождений встретится неугодный элемент, то это не повод прекращать поиски...
-	Com_sprintf (findpath, sizeof(findpath), "%s/%s", findbase, findinfo.name);
+	Com_sprintf (findpath, sizeof(findpath), "%s/%s", findbase, findinfo.path);
 	return findpath;
 }
 #else
@@ -29299,6 +29522,63 @@ char *Sys_FindFirst ( char *path, unsigned musthave, unsigned canthave )
 {
 	struct dirent *d;
 	char *p;
+	char file_path[2048];
+
+
+	for( int i=0; i<2048; i++) {
+		file_path[i] = 0;
+	}
+
+	if((strncmp((const char *)path, (const char *)"./baseq2/cache/", (size_t) 15) == 0) || \
+		(strncmp((const char *)path, (const char *)"./rogue/cache/", (size_t) 14) == 0) || \
+		(strncmp((const char *)path, (const char *)"./xatrix/cache/", (size_t) 15) == 0)) { 
+
+       	if(strncmp((const char *)path, (const char *)"./baseq2/", (size_t) 9) == 0){
+			strcpy(file_path,(const char *)sys_strHomeDirBaseq2Data);
+			strcat(file_path,(const char *)"/cache");
+
+		} else if(strncmp((const char *)path, (const char *)"./rogue/", (size_t) 8 ) == 0){
+			strcpy(file_path,(const char *)sys_strHomeDirRogueData);
+			strcat(file_path,(const char *)"/cache");
+
+		} else if(strncmp((const char *)path, (const char *)"./xatrix/", (size_t) 9 ) == 0){
+			strcpy(file_path,(const char *)sys_strHomeDirXatrixData);
+			strcat(file_path,(const char *)"/cache");
+
+    	} else {
+			strcpy(file_path,(const char *)sys_strHomeDirBaseq2Data);
+			strcat(file_path,(const char *)"/");
+
+		}
+	} else if((strncmp((const char *)path, (const char *)"./baseq2/save.q2b/", (size_t) 18) == 0) || \
+		(strncmp((const char *)path, (const char *)"./rogue/save.q2b/", (size_t) 17) == 0) || \
+		(strncmp((const char *)path, (const char *)"./xatrix/save.q2b/", (size_t) 18) == 0)) { 
+		// 
+        if(strncmp((const char *)path, (const char *)"./baseq2/", (size_t) 9) == 0){
+			strcpy(file_path,(const char *)sys_strHomeDirBaseq2Data);
+			strcat(file_path,(const char *)"/save.q2b");
+			strcat(file_path,(const char *)basename(path));
+
+		} else if(strncmp((const char *)path, (const char *)"./rogue/", (size_t) 8 ) == 0){
+			strcpy(file_path,(const char *)sys_strHomeDirRogueData);
+			strcat(file_path,(const char *)"/save.q2b");
+			strcat(file_path,(const char *)basename(path));
+
+		} else if(strncmp((const char *)path, (const char *)"./xatrix/", (size_t) 9 ) == 0){
+			strcpy(file_path,(const char *)sys_strHomeDirXatrixData);
+			strcat(file_path,(const char *)"/save.q2b");
+			strcat(file_path,(const char *)basename(path));
+
+    	} else {
+			strcpy(file_path,(const char *)sys_strHomeDirBaseq2Data);
+			strcat(file_path,(const char *)"/");
+			strcat(file_path,(const char *)basename(path));
+
+		}
+	} else {
+		// nothing... current game dir
+		strcpy(file_path,(const char *)path);	
+	}
 
 	if (fdir)
 	{
@@ -29322,6 +29602,44 @@ char *Sys_FindFirst ( char *path, unsigned musthave, unsigned canthave )
 	if (!(fdir = opendir(findbase)))
 		return NULL;
 	while ((d = readdir(fdir)))
+	{
+		if (!*findpattern || Q_GlobMatch(findpattern, d->d_name, false))
+		{
+			if (CompareAttributes(findbase, d->d_name, musthave, canthave))
+			{
+				Com_sprintf (findpath, sizeof(findpath), "%s/%s", findbase, d->d_name);
+				return findpath;
+			}
+		}
+	}
+	return NULL;
+}
+#endif
+
+
+#ifdef _WIN32
+char *Sys_FindNext ( unsigned musthave, unsigned canthave )
+{
+	struct _finddata_t findinfo;
+
+	if (findhandle == -1)
+		return NULL;
+	if (_findnext (findhandle, &findinfo) == -1)
+		return NULL;
+	if ( !CompareAttributes( findinfo.attrib, musthave, canthave ) )
+		return ".";		/// was NULL   Berserker: исправим Ку2 баг - если в череде нахождений встретится неугодный элемент, то это не повод прекращать поиски...
+
+	Com_sprintf (findpath, sizeof(findpath), "%s/%s", findbase, findinfo.name);
+	return findpath;
+}
+#else
+char *Sys_FindNext ( unsigned musthave, unsigned canthave )
+{
+	struct dirent *d;
+
+	if (!fdir)
+		return NULL;
+	while (d = readdir(fdir))
 	{
 		if (!*findpattern || Q_GlobMatch(findpattern, d->d_name, false))
 		{
@@ -29998,44 +30316,6 @@ char *FS_NextPath (char *prevpath)
 }
 
 
-#ifdef _WIN32
-char *Sys_FindNext ( unsigned musthave, unsigned canthave )
-{
-	struct _finddata_t findinfo;
-
-	if (findhandle == -1)
-		return NULL;
-	if (_findnext (findhandle, &findinfo) == -1)
-		return NULL;
-	if ( !CompareAttributes( findinfo.attrib, musthave, canthave ) )
-		return ".";		/// was NULL   Berserker: исправим Ку2 баг - если в череде нахождений встретится неугодный элемент, то это не повод прекращать поиски...
-
-	Com_sprintf (findpath, sizeof(findpath), "%s/%s", findbase, findinfo.name);
-	return findpath;
-}
-#else
-char *Sys_FindNext ( unsigned musthave, unsigned canthave )
-{
-	struct dirent *d;
-
-	if (!fdir)
-		return NULL;
-	while (d = readdir(fdir))
-	{
-		if (!*findpattern || Q_GlobMatch(findpattern, d->d_name, false))
-		{
-			if (CompareAttributes(findbase, d->d_name, musthave, canthave))
-			{
-				Com_sprintf (findpath, sizeof(findpath), "%s/%s", findbase, d->d_name);
-				return findpath;
-			}
-		}
-	}
-	return NULL;
-}
-#endif
-
-
 /*
 ** FS_ListFiles
 */
@@ -30163,20 +30443,23 @@ void FS_Path_f ()
 		Com_Printf ("Current search path:\n--------------------\n");
 		for (s=fs_searchpaths ; s ; s=s->next)
 		{
-			if ((s == fs_base_searchpaths) && (s != fs_searchpaths))
+			if ((s == fs_base_searchpaths) && (s != fs_searchpaths)) {
 				Com_Printf ("--------------------\n");
+			}			
 			if (s->pack)
 			{
 				if (!s->disabled)
 				{
-					if (s->pack->isPK2)
+					if (s->pack->isPK2)	{
 						Com_Printf ("%s \n", s->pack->filename);
-					else
+					} else {
 						Com_Printf ("%s (%i files)\n", s->pack->filename, s->pack->numfiles);
+					}				
 				}
 			}
-			else
+			else {
 				Com_Printf ("%s\n", s->filename);
+			}
 		}
 	}
 
@@ -39708,6 +39991,7 @@ void *Sys_GetGameAPI (void *parms)
 	void	*(*GetGameAPI) (void *);
 	char	name[MAX_OSPATH];
 	char	*path;
+	char _library[2048];
 #ifdef _WIN32
 	const char *gamename = "game.dll";
 #else
@@ -39717,20 +40001,57 @@ void *Sys_GetGameAPI (void *parms)
 	if (game_library)
 		Com_Error (ERR_FATAL, "Sys_GetGameAPI without Sys_UnloadGame");
 
+#ifndef _WIN32
+  	if( sys_iSysPath == 1 ) {
+		for(int i=0; i<2048; i++) {
+			_library[i] = 0;
+		}
+#ifdef PLATFORM_FREEBSD
+		dlerror(); // need for clean Undefined symbol "_nss_cache_cycle_prevention_function" message
+#endif
+		strcpy(_library, (const char *)sys_strLibPath);
+
+		if (modType("rogue")){
+			strcat(_library, (const char *)"rogue/libgame.so");
+		} else if (modType("xatrix")) {
+			strcat(_library, (const char *)"xatrix/libgame.so");
+		} else {
+			strcat(_library, (const char *)"baseq2/libgame.so");
+		}
+
+		game_library = SDL_LoadObject(_library);
+		if (game_library)
+		{
+			printf("Sys_GetGameAPI: SDL_LoadObject [%s]\n", (const char *)_library);
+		} else {
+			printf("Sys_GetGameAPI: SDL_LoadObject Error loading [%s]!!!\n",(const char *) _library);
+		}
+	
+	} else {
+#endif // NOT_WIN32
 	path = NULL;
+
 	while (1)
 	{
 		path = FS_NextPath(path);
-		if (!path)
+		if (!path) {
+			printf("Sys_GetGameAPI: Error! Couldn't find one anywhere!\n");
 			return NULL;		// couldn't find one anywhere
+		}
 		Com_sprintf(name, sizeof(name), "%s/%s", path, gamename);
 		game_library = SDL_LoadObject(name);
 		if (game_library)
 		{
+			printf("Sys_GetGameAPI: SDL_LoadObject [%s]\n", (const char *)name);
 			Com_DPrintf("SDL_LoadObject (%s)\n", name);
 			break;
+		} else {
+			printf("Sys_GetGameAPI: SDL_LoadObject Error loading [%s]!!!\n",(const char *) _library);
 		}
 	}
+#ifndef _WIN32
+  }
+#endif
 
 	GetGameAPI = (void *(*)(void *)) SDL_LoadFunction (game_library, "GetGameAPI");
 	if (!GetGameAPI)
@@ -42903,7 +43224,8 @@ void IN_StartupJoystick ()
 	}
 
 	// abort startup if we didn't find a valid joystick
-	if ((numdevs = SDL_NumJoysticks ()) == 0)
+	numdevs = SDL_NumJoysticks();
+	if (numdevs == 0)
 	{
 		Com_Printf ("joystick not found -- no valid joysticks\n\n");
 		SDL_QuitSubSystem (SDL_INIT_JOYSTICK);
@@ -42913,15 +43235,18 @@ void IN_StartupJoystick ()
 	// allow user to specify joystick by index
 	joy_index = Cvar_Get ("joy_index", "0", CVAR_NOSET);
 
-	if ((joy = SDL_JoystickOpen ((int)joy_index->value)) == NULL)
+	joy = SDL_JoystickOpen((int)joy_index->value);
+	if (joy == NULL)
 	{
 		Com_Printf ("^1Failed to open joystick %i\n\n", (int)joy_index->value);
 		SDL_QuitSubSystem (SDL_INIT_JOYSTICK);
 		return;
 	}
 
-	if (joy_name = SDL_JoystickName (joy))
-		Cvar_Set ("joy_name", joy_name);
+	joy_name = SDL_JoystickName(joy);
+	if (joy_name) {
+		Cvar_Set ("joy_name", (const char*)joy_name);
+	}
 
 	// save the joystick's number of buttons and POV status
 	joy_numbuttons = SDL_JoystickNumButtons (joy);
@@ -45683,7 +46008,6 @@ void SDL_EventProc(SDL_Event *ev)
 bool VID_LoadRefresh()
 {
 	Com_Printf( "------- Video System restart -------\n", name );
-	printf( "------- Video System restart -------\n", name );
 
 	if ( reflib_active )
 		R_Shutdown();
@@ -53407,6 +53731,12 @@ nomodes:		/// при отсутствии modelist.txt формируем деф
 		_VID_NUM_MODES++;
 
 		vid_modes[_VID_NUM_MODES].width = 1280;
+		vid_modes[_VID_NUM_MODES].height = 720;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1280 960 ]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 1280;
 		vid_modes[_VID_NUM_MODES].height = 960;
 		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1280 960 ]");
 		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
@@ -53418,7 +53748,31 @@ nomodes:		/// при отсутствии modelist.txt формируем деф
 		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
 		_VID_NUM_MODES++;
 
+		vid_modes[_VID_NUM_MODES].width = 1366;
+		vid_modes[_VID_NUM_MODES].height = 768;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
 		vid_modes[_VID_NUM_MODES].width = 1600;
+		vid_modes[_VID_NUM_MODES].height = 900;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 1600;
+		vid_modes[_VID_NUM_MODES].height = 1200;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 1920;
+		vid_modes[_VID_NUM_MODES].height = 1080;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 1920;
 		vid_modes[_VID_NUM_MODES].height = 1200;
 		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
 		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
@@ -53426,6 +53780,24 @@ nomodes:		/// при отсутствии modelist.txt формируем деф
 
 		vid_modes[_VID_NUM_MODES].width = 2048;
 		vid_modes[_VID_NUM_MODES].height = 1536;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[2048 1536]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 2560;
+		vid_modes[_VID_NUM_MODES].height = 1080;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[2048 1536]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 2560;
+		vid_modes[_VID_NUM_MODES].height = 1440;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[2048 1536]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width =  3840;
+		vid_modes[_VID_NUM_MODES].height = 2160;
 		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[2048 1536]");
 		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
 		_VID_NUM_MODES++;
@@ -57085,16 +57457,13 @@ void SplitPolygon(vec3_t *polygon,int *signs, int vnum, dplane_t *plane, vec3_t 
 	int i;
 	float sect;
 
-	for (i=0;  i<vnum; i++)
-	{
+	for (i=0;  i<vnum; i++) {
 		ptB = &polygon[i];
 		sideB = signs[i];
 
 		//is b on "right side"
-		if (sideB == 2)
-		{
-			if (sideA == 1)
-			{
+		if (sideB == 2) {
+			if (sideA == 1) {
 				// compute the intersection point of the line
 				// from point A to point B with the partition
 				// plane. This is a simple ray-plane intersection.
@@ -57112,51 +57481,46 @@ void SplitPolygon(vec3_t *polygon,int *signs, int vnum, dplane_t *plane, vec3_t 
 			}
 			VectorCopy (polygon[i], outpts[out_c]);
 			out_c++;
-		}
-		//b is on "left" side
-		else
-			if (sideB ==1)
-			{
-				if (sideA == 2)
-				{
-					// compute the intersection point of the line
-					// from point A to point B with the partition
-					// plane. This is a simple ray-plane intersection.
-					VectorSubtract ((*ptB), (*ptA), v);
-					sect = - (DotProduct (plane->normal, (*ptA) )-plane->dist) / DotProduct (plane->normal, v);
-					VectorScale (v,sect,v);
 
-					//add a new vertex
-					VectorAdd ((*ptA), v, newVert);
-					VectorCopy (newVert, inpts[in_c]);
-					VectorCopy (newVert, outpts[out_c]);
+		} else if (sideB ==1) { //b is on "left" side
+			if (sideA == 2) {
+				// compute the intersection point of the line
+				// from point A to point B with the partition
+				// plane. This is a simple ray-plane intersection.
+				VectorSubtract ((*ptB), (*ptA), v);
+				sect = - (DotProduct (plane->normal, (*ptA) )-plane->dist) / DotProduct (plane->normal, v);
+				VectorScale (v,sect,v);
 
-					out_c++;
-					in_c++;
-				}
-				VectorCopy (polygon[i], inpts[in_c]);
-				in_c++;
-			}
-			//b is almost on plane
-			else
-			{
-				VectorCopy (polygon[i], inpts[in_c]);
-				VectorCopy (inpts[in_c], outpts[out_c]);
-				in_c++;
+				//add a new vertex
+				VectorAdd ((*ptA), v, newVert);
+				VectorCopy (newVert, inpts[in_c]);
+				VectorCopy (newVert, outpts[out_c]);
+
 				out_c++;
+				in_c++;
 			}
+			VectorCopy (polygon[i], inpts[in_c]);
+			in_c++;
 
-			ptA = ptB;
-			sideA = sideB;
+		} else { //b is almost on plane
+				
+			VectorCopy (polygon[i], inpts[in_c]);
+			VectorCopy (inpts[in_c], outpts[out_c]);
+			in_c++;
+			out_c++;
+		}
 
-			if ((out_c > MAX_POLY_VERT) || (in_c > MAX_POLY_VERT))
-			{
-				Com_DPrintf ("MAX_POLY_VERT exceeded: %i %i\n", in_c, out_c);
-				//just return what we've got
-				(*innum) = in_c;
-				(*outnum) = out_c;
-				return;
-			}
+		ptA = ptB;
+		sideA = sideB;
+
+		if ((out_c > MAX_POLY_VERT) || (in_c > MAX_POLY_VERT))
+		{
+			Com_DPrintf ("MAX_POLY_VERT exceeded: %i %i\n", in_c, out_c);
+			//just return what we've got
+			(*innum) = in_c;
+			(*outnum) = out_c;
+			return;
+		}
 	}
 
 	(*innum) = in_c;
@@ -57186,23 +57550,26 @@ void TryToCacheTrackIfNeed(char *track)
 			{
 				FS_CreatePath(name);
 				f = FS_Fopen(name, "wb");
-				if (f)
+				if (f) {
 					fwrite (s_backgroundFile, s_backgroundFileLength, 1, f);
+				}
 			}
 			Z_Free( s_backgroundFile );
 			s_backgroundFile = NULL;
 			s_playingFile[0] = 0;
-			if (!f)
+			if (!f) {
 				goto er;
-			else
+			} else {
 				Com_Printf("^2%i msec\n", endTime - startTime);
+			}
 		}
 		else
 er:			Com_Printf("^1failed\n");
 	}
 
-	if (f)
+	if (f) {
 		fclose (f);
+	}
 }
 
 /*
@@ -84337,25 +84704,28 @@ void SpinControl_DoSlide( menulist_s *s, int dir )
 ///		s->curvalue = 0;
 ///	else if ( s->itemnames[s->curvalue] == 0 )
 ///		s->curvalue--;
-if ( s->curvalue < 0 )
-{
-	s->curvalue = 0;
-	while (1)
-	{
-		if (s->itemnames[s->curvalue])
-			s->curvalue++;
-		else
-		{
-			s->curvalue--;
-			break;
-		}
-	}
-}
-else if ( s->itemnames[s->curvalue] == 0 )
-	s->curvalue = 0;
 
-	if ( s->generic.callback )
+	if ( s->curvalue < 0 )
+	{
+		s->curvalue = 0;
+		while (1)
+		{
+			if (s->itemnames[s->curvalue]) {
+				s->curvalue++;
+			}
+			else
+			{
+				s->curvalue--;
+				break;
+			}
+		}
+	} else if ( s->itemnames[s->curvalue] == 0 ) {
+		s->curvalue = 0;
+	}
+
+	if ( s->generic.callback ) {
 		s->generic.callback( s );
+	}
 }
 
 
@@ -87916,7 +88286,8 @@ void Spec_Hash_Init()
 void Common_Init (int argc, char **argv)
 {
 	char	*s;
-
+	//char 	_strHomeDirData[2048];
+	char 	_strHomeTestFile[2048];	
 	if (setjmp (abortframe) )
 		Sys_Error ("Error during initialization");
 
@@ -87928,6 +88299,155 @@ void Common_Init (int argc, char **argv)
 	// prepare enough of the subsystems to handle
 	// cvar and command buffer management
 	COM_InitArgv (argc, argv);
+
+// #######################################################################################################
+#ifdef PLATFORM_UNIX
+	char* _strExePath = SDL_GetBasePath();
+	printf("\nInit: Begin...\n");
+	printf("Init: Game start with path: %s\n", (const char *)_strExePath);
+#if defined(__OpenBSD__) || defined(__FreeBSD__)
+	int _isystempath = strncmp((const char *)_strExePath, (const char *) "/usr/local/bin/", (size_t) 15 );
+#elif defined(__NetBSD__)
+	int _isystempath = strncmp((const char *)_strExePath, (const char *) "/usr/pkg/bin/", (size_t) 13 );
+#else
+	int _isystempath = strncmp((const char *)_strExePath, (const char *) "/usr/bin/", (size_t) 9 );
+#endif // defined(__OpenBSD__) || defined(__FreeBSD__)
+	if( _isystempath == 0 ) {
+		sys_iSysPath = 1; // using system path
+	} else {
+		sys_iSysPath = 0; // using standarted path
+	}
+	// check game data on /usr.../share/berserkerq2
+#if defined(PLATFORM_FREEBSD)
+	if( access((const char *)"/usr/local/share/berserkerq2/baseq2/bsq2-01.pk2", F_OK) == 0 ) {
+		sys_iSysDataPath = 1;
+		printf("Init: Found game data on /usr/local/share/berserkerq2/baseq2\n");
+	} else {
+		sys_iSysDataPath = 0;
+		printf("Init: Not found game data on /usr/local/share/berserkerq2/baseq2\n");
+	}
+#else
+	if( access((const char *)"/usr/share/berserkerq2/baseq2/bsq2-01.pk2", F_OK) == 0 ) {
+		sys_iSysDataPath = 1;
+		printf("Init: Found game data on /usr/share/berserkerq2/baseq2\n");
+	} else {
+		sys_iSysDataPath = 0;
+		printf("Init: Not found game data on /usr/share/berserkerq2/baseq2\n");
+	}
+#endif // PLATFORM_FREEBSD
+
+ 	// Path vars
+  	int sys_iGameBits  = (int)(CHAR_BIT * sizeof(void *));
+  	printf("Init: Running %d-bit version\n", sys_iGameBits);
+
+	// clean 
+	for (int i=0; i< 2048; i++) {
+ 		_strHomeTestFile[i] = 0;
+		//_strHomeDirData[i] = 0;
+		sys_strLibPath[i] = 0;
+		sys_strHomeDirData[i] = 0;
+		sys_strHomeDirBaseq2Data[i] = 0;
+		sys_strHomeDirRogueData[i] = 0;
+		sys_strHomeDirXatrixData[i] = 0;
+		sys_strCurrentDirData[i] = 0;
+	}
+
+  	// get library path
+#if defined(__OpenBSD__) || defined(__FreeBSD__)
+  	if( sys_iSysPath == 1 ) {
+    	strcpy(sys_strLibPath, ((const char *))"/usr/local/lib/berserkerq2/");
+#elif defined(__NetBSD__)
+  	if( sys_iSysPath == 1 ) {
+		strcpy(sys_strLibPath, ((const char *))"/usr/pkg/lib/berserkerq2/");
+#else
+  if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *)"/usr/lib/aarch64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/aarch64-linux-gnu/berserkerq2/"); 
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && (access((const char *) "/usr/lib/arm-linux-gnueabihf/berserkerq2/baseq2/libgame.so", F_OK)== 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/arm-linux-gnueabihf/berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/riscv64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/riscv64-linux-gnu/berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/s390x-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/s390x-linux-gnu/berserkerq2/"); 
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/powerpc64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/powerpc64-linux-gnu/berserkerq2/"); 
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/x86_64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/x86_64-linux-gnu/berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && (access((const char *) "/usr/lib/i386-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/i386-linux-gnu/berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib64/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *) "/usr/lib64//berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && (access((const char *) "/usr/lib/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib//berserkerq2/");
+#endif
+  } else if( sys_iSysPath == 0 ) {
+    printf("Init: Use local install.\n");
+  } else {
+    printf("Init: Error! Game libraries not ound!\n");
+    printf("Init: Failed to search game libraries installed!\nInit: Please reinstall the game.\n");
+  }
+
+	// home dir data...
+	struct passwd *pw = getpwuid(getuid());
+	const char *_homedir = pw->pw_dir;
+
+	strncpy(_strHomeTestFile, (const char *)_homedir, (size_t)strlen(_homedir));
+	strncpy(sys_strHomeDirData, (const char *)_homedir, (size_t)strlen(_homedir));
+	_strHomeTestFile[strlen(_homedir)] = 0x00;
+	sys_strHomeDirBaseq2Data[strlen(_homedir)] = 0x00;
+	strncat(sys_strHomeDirData, (const char *)"/.berserkerq2", (size_t)13);
+	strncpy(sys_strHomeDirBaseq2Data, (const char *)sys_strHomeDirData, (size_t)strlen(sys_strHomeDirData));
+	strncat(_strHomeTestFile, (const char *)"/.berserkerq2/baseq2/bsq2-01.pk2", (size_t)32);
+	printf("Init: Home data directory: %s\n", (const char *)sys_strHomeDirBaseq2Data);
+
+	// create dirs...
+	int _status = mkdir((const char *)sys_strHomeDirBaseq2Data, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	strncat(sys_strHomeDirBaseq2Data, (const char *)"/baseq2", (size_t)7);
+	strncat(sys_strHomeDirRogueData, (const char *)"/rogue", (size_t)6);
+	strncat(sys_strHomeDirXatrixData, (const char *)"/xatrix", (size_t)7);
+	_status = mkdir((const char *)sys_strHomeDirRogueData, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	_status = mkdir((const char *)sys_strHomeDirXatrixData, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	_status = mkdir((const char *)sys_strHomeDirBaseq2Data, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+	int errsv = errno;
+
+	if(_status == 0) {
+		printf("Init: Home directory ~/.berserkerq2/baseq2 not exist. Create... %s\n", (const char *)sys_strHomeDirBaseq2Data);
+	}
+
+	if((_status != 0) && (errsv == EEXIST)) {
+		if( access((const char *)_strHomeTestFile, F_OK) == 0 ) {
+			sys_iHomeDataPath = 1;
+			printf("Init: Found game data on: %s\n", (const char *)sys_strHomeDirBaseq2Data);
+		} else {
+			sys_iHomeDataPath = 0;
+			printf("Init: Not found game data on standart path: %s\n", (const char *)sys_strHomeDirBaseq2Data);	
+		}
+	} else {
+		printf("Init: Not found game data folder on standart path: %s\n", (const char *)sys_strHomeDirBaseq2Data);
+	}	
+
+	// clean 
+	for (int i=0; i< 2048; i++) {
+ 		_strHomeTestFile[i] = 0;
+	}
+
+	strncpy(_strHomeTestFile, (const char *)_strExePath, (size_t)strlen(_strExePath));
+	strncat(_strHomeTestFile, (const char *)"baseq2/bsq2-01.pk2", (size_t)18);
+	if( access((const char *)_strHomeTestFile, F_OK) != 0 ) {
+		if( sys_iSysDataPath == 0 &&  sys_iHomeDataPath == 0) { 
+			printf("Init: Error! Failed access to extra game data\n");
+			printf("Init: Download game data archive from https://github.com/tx00100xt/BerserkerQuake2/releases\n");
+			printf("Init: And unpack to root game directory.\n\n");
+			exit(1);
+		}
+	} else {
+		sys_iCurrentDataPath = 1;
+		strncpy(sys_strCurrentDirData, (const char *)_strExePath, (size_t)(strlen(_strExePath) - 1)); // remove slash
+		printf("Init: Found game data on: %s\n", (const char *)sys_strCurrentDirData);
+	}
+	printf("Init: End.\n\n");
+
+#endif // PLATFORM_UNIX
+// #######################################################################################################
 
 	Swap_Init ();
 	Cbuf_Init ();
@@ -88889,8 +89409,9 @@ bool	Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 	sequence_ack = MSG_ReadLong (msg);
 
 	// read the qport if we are a server
-	if (chan->sock == NS_SERVER)
+	if ((chan->sock) == NS_SERVER) {
 		qport = MSG_ReadShort (msg);
+	}
 
 	reliable_message = sequence >> 31;
 	reliable_ack = sequence_ack >> 31;
@@ -88901,9 +89422,9 @@ bool	Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 //
 // discard stale or duplicated packets
 //
-	if (sequence <= chan->incoming_sequence)
+	if (sequence <= (chan->incoming_sequence)) {
 		return false;
-
+	}
 //
 // dropped packets don't keep the message from being used
 //
@@ -88913,9 +89434,9 @@ bool	Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 // if the current outgoing reliable message has been acknowledged
 // clear the buffer to make way for the next
 //
-	if (reliable_ack == chan->reliable_sequence)
+	if (reliable_ack == (chan->reliable_sequence)) {
 		chan->reliable_length = 0;	// it has been received
-
+	}
 //
 // if this message contains a reliable message, bump incoming_reliable_sequence
 //

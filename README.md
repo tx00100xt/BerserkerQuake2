@@ -61,13 +61,13 @@ http://deponie.yamagi.org/quake2/idstuff/q2-3.20-x86-full-ctf.exe
 The content can be extracted using any utility for working with ZIP files.  
 
 If you have access to a copy of the game (either by CD or through Steam),  
-you can copy the **pak0-2.pak** files and **player,video** from the game   
+you can copy the **pak0-2.pak** files and **video** directory from the game   
 directory to the repository (put it in the **baseq2 repository directory**).  
 
 #### NOTE:
-**pak0-2.pak** must have lowercase names.
+**pak0-2.pak** and **video** directory must have lowercase names.
 
-#### Building with CMakeLists.txt
+#### Building
 
 Type this in your terminal:
 
@@ -81,36 +81,95 @@ make install
 ```
 If you prefer **ninja**, then add key **-GNinja** to the cmake. And replace the **make** command with **ninja**.
 
-#### Building with Makefile
+#### Building and install to the system
 
 Type this in your terminal:
 
 ```
 cd BerserkerQuake2/Sources
-
-make release
-make install.local
+mkdir build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/usr
+make -j4
+sudo make install
 ```
 
 You can view additional commands for make by typing the make command in the terminal without arguments.
 
-### Running the game
+### Extra data game content
 
 Then you will have to get some extra data that comes with this engine. You can get it from  
-[Release section](https://github.com/tx00100xt/BerserkerQuake2/releases). Extract the archive in  your BerserkerQuake2 directory. The content itself is identical to those hosted  
+[Release section](https://github.com/tx00100xt/BerserkerQuake2/releases). The content itself is identical to those hosted  
 at official website and ModDB, except all file names were converted  to lower case. The contents of the *.fx and *.sp3 files were  
 edited so that the paths to the textures files were in lower case  and references to them, as well as paths have been fixed to use  
-slashes instead of backslashesso. Hopefully there isn't any problem with file access on Linux and BSD systems.  
+slashes instead of backslashes. Each **pk2** archive contains a GPL-2.0 license file copied from the official archive on ModDB.  
 
-After this run game.  
+### Location of game content
+
+Game content can be located in three places.
+
+ - In the /usr/share/berserkerq2 (Linux)
+ - In the /usr/local/share/berserkerq2 (BSD)
+ - In the directory ~/.berserkerq2
+ - Anywhere with portable installation
+
+The file tree should be like this:
+```
+.
+├── baseq2
+│   ├── bsq2-01.pk2
+│   ├── bsq2-02.pk2
+│   ├── bsq2-03.pk2
+│   ├── bsq2-04.pk2
+│   ├── bsq2-05.pk2
+│   ├── bsq2-06.pk2
+│   ├── bsq2-07.pk2
+│   ├── bsq2-08.pk2
+│   ├── bsq2-09.pk2
+│   ├── bsq2-10.pk2
+│   ├── pak0.pak
+│   ├── pak1.pak
+│   ├── pak2.pak
+│   ├── purepaks.lst
+│   └── video
+│       ├── end.cin
+│       ├── eou1_.cin
+│       ├── eou2_.cin
+│       ├── eou3_.cin
+│       ├── eou4_.cin
+│       ├── eou5_.cin
+│       ├── eou6_.cin
+│       ├── eou7_.cin
+│       ├── eou8_.cin
+│       ├── idlog.cin
+│       └── ntro.cin
+├── modelist.txt
+```
+The file **purepaks.lst** contains the names of the packs that will be used in the game.  
+Without it, the game will not start.  
+The file **modelist.txt** contains a list of allowed screen resolutions. You can edit it and add your own non-standard resolutions.  
+
+The configuration file (**q2b_config.cfg**), as well as save and cache files, will always be located in directory **~/.berserkerq2**.
+
+#### NOTE:
+All file and directory names must be in lower case.
+
+### Running the game
+After building and placing the game data, you can launch the games.  
 Type this in your terminal:  
 
 ```
 cd BerserkerQuake2
 ./berserkerq2
 ```
+or or just type in the terminal:   
+```
+berserkerq2
+```
+if you installing the game on the system.
+
 #### NOTE:
-Non-standard screen resolution can be specified in the modelist.txt file.
+Non-standard screen resolution can be specified in the **modelist.txt** file.
 
 Supported Architectures
 ----------------------
@@ -120,11 +179,4 @@ Supported OS
 -----------
 * `Linux`
 * `OpenBSD`
-
-TODO:
------
-* `Perform a normal installation on the system.`
-* `Use the home directory ~/berserkerq2. for a system installation.`
-* `Fix code to correct multiple compiler warnings.`
-* `Just fix the code in some places`
 
