@@ -377,13 +377,13 @@ jobs:
             cmake BerserkerQuake2/Sources -B BerserkerQuake2/Sources/build-aarch64 -DCMAKE_BUILD_TYPE=${{ matrix.Configuration }} -DRPIOS=TRUE
             make -j4 -C BerserkerQuake2/Sources/build-aarch64
             make -C BerserkerQuake2/Sources/build-aarch64 install
-            mv -f BerserkerQuake2/baseq2/libgame.so x32/baseq2
-            mv -f BerserkerQuake2/berserkerq2 x32
+            mv -f BerserkerQuake2/baseq2/libgame.so x64/baseq2
+            mv -f BerserkerQuake2/berserkerq2 x64
             echo "*** Copy Data files ***"
-            cp -vfr BerserkerQuake2/{baseq2/purepaks.lst,baseq2/default.cfg} x32/baseq2
-            cp -vfr BerserkerQuake2/{README.md,LICENSE.md,modelist.txt} x32
+            cp -vfr BerserkerQuake2/{baseq2/purepaks.lst,baseq2/default.cfg} x64/baseq2
+            cp -vfr BerserkerQuake2/{README.md,LICENSE.md,modelist.txt} x64
             echo "*** Create archive ***"
-            mv x32 aarch64
+            mv x64 aarch64
             XZ_DEFAULTS="-T 10" tar --use-compress-program=xz -cpvf berserkerq2-${{ steps.date.outputs.time }}-rpios-aarch64-bin.tar.xz aarch64
             cp berserkerq2-${{ steps.date.outputs.time }}-rpios-aarch64-bin.tar.xz Release/
 

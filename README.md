@@ -100,10 +100,11 @@ You can view additional commands for make by typing the make command in the term
 ### Extra data game content
 
 Then you will have to get some extra data that comes with this engine. You can get it from  
-[Release section](https://github.com/tx00100xt/BerserkerQuake2/releases). The content itself is identical to those hosted  
-at official website and ModDB, except all file names were converted  to lower case. The contents of the *.fx and *.sp3 files were  
-edited so that the paths to the textures files were in lower case  and references to them, as well as paths have been fixed to use  
-slashes instead of backslashes. Each **pk2** archive contains a GPL-2.0 license file copied from the official archive on ModDB.  
+[Release section](https://github.com/tx00100xt/BerserkerQuake2/releases). The content itself is identical to those hosted at official website and ModDB,  
+except all file names were converted  to lower case. The contents of the *.fx and *.sp3 files  
+were edited so that the paths to the textures files were in lower case  and references to them,  
+as well as paths have been fixed to use slashes instead of backslashes. Each **pk2** archive   
+contains a GPL-2.0 license file copied from the official archive on ModDB.  
 
 ### Location of game content
 
