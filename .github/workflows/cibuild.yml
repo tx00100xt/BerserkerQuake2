@@ -260,7 +260,7 @@ jobs:
         with:
           name: berserkerq2-${{ steps.date.outputs.time }}-bsd-amd64-bin.tar.xz
           path: berserkerq2-${{ steps.date.outputs.time }}-bsd-amd64-bin.tar.xz
-
+          
   build-raspios-armv7l:
     name: RPi OS Lite ${{ matrix.Configuration }} ${{ matrix.arch }}
     runs-on: ubuntu-22.04

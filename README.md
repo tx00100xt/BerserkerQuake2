@@ -175,6 +175,7 @@ Non-standard screen resolution can be specified in the **modelist.txt** file.
 Supported Architectures
 ----------------------
 * `x86`
+* `aarch64`
 
 Supported OS
 -----------
