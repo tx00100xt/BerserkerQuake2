@@ -23,8 +23,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 ===========================================================================
 */
 
-#include <libgen.h>
-#include <string.h>
+// basename GNU
+#if defined(PLATFORM_UNIX)
+#define _GNU_SOURCE
+#include <string.h> // basename GNU
+#endif
+
 #include "main.h"
 #include "unpak.h"
 

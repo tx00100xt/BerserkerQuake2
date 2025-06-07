@@ -2977,10 +2977,10 @@ const char *get_filename_ext(const char *filename) {
     return dot + 1;
 }
 
-// Alpine linux needed
-#ifndef basename
-#pragma warrning "include libgen.h ..." 
-#include <libgen.h>
+// basename GNU
+#if defined(PLATFORM_UNIX)
+#define _GNU_SOURCE
+#include <string.h> // basename GNU
 #endif
 
 FILE *FS_Fopen(const char *name, const char *mode)
