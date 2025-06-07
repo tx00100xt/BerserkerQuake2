@@ -158,7 +158,7 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
           sudo apt-get install -qq -y bison flex zlib1g-dev libxxhash-dev &&
-          sudo apt-get install -qq -y libjpeg-dev libpng-dev minizip libminizip-dev
+          sudo apt-get install -qq -y libjpeg62-dev libpng-dev minizip libminizip-dev
 
     - name: Get current date
       id: date
@@ -298,7 +298,7 @@ jobs:
             test `uname -m` = ${{ matrix.arch }}
             grep Model /proc/cpuinfo
             apt-get update -y --allow-releaseinfo-change
-            apt-get install --no-install-recommends -y git libjpeg-dev libpng-dev libminizip-dev cmake make gcc libc6-dev libsdl2-dev libogg-dev libvorbis-dev zlib1g-dev libvulkan1 libvulkan-dev    
+            apt-get install --no-install-recommends -y git libjpeg62-dev libpng-dev libminizip-dev cmake make gcc libc6-dev libsdl2-dev libogg-dev libvorbis-dev zlib1g-dev libvulkan1 libvulkan-dev    
             cat /proc/cpuinfo
             cat /etc/os-release
             mkdir {x32,x32/baseq2}
@@ -366,7 +366,7 @@ jobs:
             test `uname -m` = ${{ matrix.arch }}
             grep Model /proc/cpuinfo
             apt-get update -y --allow-releaseinfo-change
-            apt-get install --no-install-recommends -y git libjpeg-dev libpng-dev libminizip-dev cmake make gcc libc6-dev libsdl2-dev libogg-dev libvorbis-dev zlib1g-dev libvulkan1 libvulkan-dev
+            apt-get install --no-install-recommends -y git libjpeg62-dev libpng-dev libminizip-dev cmake make gcc libc6-dev libsdl2-dev libogg-dev libvorbis-dev zlib1g-dev libvulkan1 libvulkan-dev
             cat /proc/cpuinfo
             cat /etc/os-release
             mkdir {x64,x64/baseq2}
@@ -445,7 +445,7 @@ jobs:
                 apt-get install -qq -y git cmake build-essential xz-utils &&
                 apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
                 apt-get install -qq -y imagemagick bison flex zlib1g-dev libxxhash-dev &&
-                apt-get install -qq -y libjpeg-dev libpng-dev libminizip-dev  
+                apt-get install -qq -y libjpeg62-dev libpng-dev libminizip-dev  
                 ;;
               fedora*)
                 dnf -y update
@@ -542,7 +542,7 @@ jobs:
                 apt-get install -qq -y git cmake build-essential xz-utils &&
                 apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
                 apt-get install -qq -y imagemagick bison flex zlib1g-dev libxxhash-dev &&
-                apt-get install -qq -y libjpeg-dev libpng-dev minizip libminizip-dev
+                apt-get install -qq -y libjpeg62-dev libpng-dev minizip libminizip-dev
                 ;;
               fedora*)
                 dnf -y update
@@ -639,7 +639,7 @@ jobs:
                 apt-get install -qq -y git cmake build-essential xz-utils &&
                 apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
                 apt-get install -qq -y imagemagick bison flex zlib1g-dev libxxhash-dev &&
-                apt-get install -qq -y libjpeg-dev libpng-dev minizip libminizip-dev
+                apt-get install -qq -y libjpeg62-dev libpng-dev minizip libminizip-dev
                 ;;
               fedora*)
                 dnf -y update
@@ -771,7 +771,7 @@ jobs:
           uname -a
           cat /proc/cpuinfo
           apt-get update -qq
-          apt-get install -qq -y git cmake gcc-c++ libSDL2-devel libogg-devel libstdc++-devel-static libvorbis-devel zlib-devel libjpeg-devel libpng-devel libminizip-ng-devel
+          apt-get install -qq -y git cmake gcc-c++ libSDL2-devel libogg-devel libstdc++-devel-static libvorbis-devel zlib-devel libjpeg62-devel libpng-devel libminizip-ng-devel
           git clone https://github.com/tx00100xt/BerserkerQuake2.git berserkerq2
           git clone https://github.com/zlib-ng/minizip-ng.git
           cd minizip-ng && mkdir build
@@ -906,7 +906,7 @@ jobs:
           uname -a
           cat /proc/cpuinfo
           apt-get update -qq
-          apt-get install -qq -y git cmake gcc-c++ libSDL2 libSDL2-devel-static libSDL2-devel libogg-devel libstdc++-devel-static libvorbis-devel zlib-devel libjpeg-devel libpng-devel libminizip-ng-devel
+          apt-get install -qq -y git cmake gcc-c++ libSDL2 libSDL2-devel-static libSDL2-devel libogg-devel libstdc++-devel-static libvorbis-devel zlib-devel libjpeg62-devel libpng-devel libminizip-ng-devel
           cp -vfr /usr/lib64/*SDL2* /usr/lib
           cp -vfr /usr/lib64/*libz.* /usr/lib
           git clone https://github.com/tx00100xt/BerserkerQuake2.git berserkerq2
