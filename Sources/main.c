@@ -32,6 +32,22 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "defs.h"
 #include "data.h"
 
+#ifdef PLATFORM_UNIX
+// ############ Unix variables ###########
+
+int		sys_iSysPath = 0;
+char 	sys_strLibPath[2048];
+
+#ifndef BERS_ARCH_STR
+#define BERS_ARCH_STR "ARCH"
+#endif
+
+#if defined(__FreeBSD__)
+#define	F_OK	0
+#endif
+// #######################################
+#endif
+
 
 #ifndef _WIN32
 char *strlwr(char *str)
@@ -1417,7 +1433,7 @@ void S_DecodeOGGtoWAV(const char *intro)
 	ov_callbacks	vorbisCallbacks = {ovc_read, ovc_seek, ovc_close, ovc_tell};
 	ogg_file_buffer_pos = 0;
 
-	FILE	f;		// подставим тупо пустой f, чтоб ogg.lib схавала и не ругалась.
+	FILE	*f;		// подставим тупо пустой f, чтоб ogg.lib схавала и не ругалась.
 	int err = ov_open_callbacks(&f, &vf, NULL, 0, vorbisCallbacks);
 	if (err < 0)
 		Com_Printf("^3WARNING:^7 couldn't open OGG stream (%s), err = %s\n", intro, ogg_error(err));
@@ -9658,7 +9674,7 @@ int R_Init()
 	char vendor_buffer[1000];
 	int	err;
 
-	printf("R_Init(): Begin...\n" );
+	printf("R_Init: Begin...\n" );
 	Init_Palette ();
 
 	R_Register();
@@ -9670,10 +9686,10 @@ int R_Init()
 	if ( !R_SetMode () )
 	{
 		Com_Printf("^1R_Init(): could not R_SetMode()\n" );
-		printf("R_Init(): could not R_SetMode()\n" );
+		printf("R_Init: could not R_SetMode()\n" );
 		return -1;
 	}
-	printf("R_Init(): R_SetMode() done.\n" );
+	printf("R_Init: SetMode done.\n\n" );
 
 	// get our various GL strings
 	gl_config.vendor_string = (char*)glGetString (GL_VENDOR);
@@ -9702,7 +9718,7 @@ int R_Init()
 	char *string = (char*)gl_config.extensions_string;
 //	Com_Printf("GL_EXTENSIONS: %s\n", gl_config.extensions_string );	// From old engine...
 	Com_Printf("\nGL_EXTENSIONS:\n--------------\n");
-	printf("\nGL_EXTENSIONS:\n--------------\n");
+	printf("\nGL_EXTENSIONS:  ");
 	char c, line[128];
 	int i;
 	while (1)
@@ -9721,7 +9737,7 @@ int R_Init()
 			break;
 		line[i] = 0;
 		Com_Printf("%s\n", line);
-		printf("%s\n", line);
+		printf("%s  ", line);
 	}
 	Com_Printf("\n");
 	printf("\n");
@@ -9736,20 +9752,20 @@ repeat:
 	if(!GL_SelectShader())
 	{
 		Com_Printf("^1No shaders available!\n");
-		printf("No shaders available!\n");
+		printf("R_Init: No shaders available!\n");
 		if (!r_simple->value)
 		{
 			Cvar_ForceSetValue("r_simple", 1);
 			Com_Printf("^3r_simple forced to 1\n");
-			printf("r_simple forced to 1\n");
+			printf("R_Init: r_simple forced to 1\n");
 			goto repeat;
 		}
 		else {
-			printf("R_Init(): GL_SelectShader() Error!\n");
+			printf("R_Init: GL_SelectShader() Error!\n");
 			return -1;
 		}
 	}
-	printf("R_Init(): GL_SelectShader() done!\n");
+	printf("R_Init: GL_SelectShader() done!\n");
 
 	if(gl_config.anisotropic && r_anisotropy->value)
 		Com_Printf("...using anisotropy: %i\n", (int)r_anisotropy->value);
@@ -9882,10 +9898,10 @@ repeat:
 	if(!Draw_InitFonts ())
 	{
 		Com_Printf("^1X..Error loading font texture\n");
-		printf("X..Error loading font texture\n");
+		printf("R_Init: X..Error loading font texture\n");
 		return -1;
 	}
-	printf("Draw_InitFonts.. loading font texture done.\n");
+	printf("R_Init: Draw_InitFonts() loading font texture done.\n");
 
 	if (gl_config.occlusion)
 	{
@@ -10088,7 +10104,7 @@ void CL_Shutdown()
 
 	if (isdown)
 	{
-		printf ("recursive shutdown\n");
+		printf ("CL_Shutdown: recursive shutdown\n");
 		return;
 	}
 	isdown = true;
@@ -39812,6 +39828,7 @@ void *Sys_GetGameAPI (void *parms)
 	void	*(*GetGameAPI) (void *);
 	char	name[MAX_OSPATH];
 	char	*path;
+	char _library[2048];
 #ifdef _WIN32
 	const char *gamename = "game.dll";
 #else
@@ -39821,20 +39838,57 @@ void *Sys_GetGameAPI (void *parms)
 	if (game_library)
 		Com_Error (ERR_FATAL, "Sys_GetGameAPI without Sys_UnloadGame");
 
+#ifndef _WIN32
+  	if( sys_iSysPath == 1 ) {
+		for(int i=0; i<2048; i++) {
+			_library[i] = 0;
+		}
+#ifdef PLATFORM_FREEBSD
+		dlerror(); // need for clean Undefined symbol "_nss_cache_cycle_prevention_function" message
+#endif
+		strcpy(_library, (const char *)sys_strLibPath);
+
+		if (modType("rogue")){
+			strcat(_library, (const char *)"rogue/libgame.so");
+		} else if (modType("xatrix")) {
+			strcat(_library, (const char *)"xatrix/libgame.so");
+		} else {
+			strcat(_library, (const char *)"baseq2/libgame.so");
+		}
+
+		game_library = SDL_LoadObject(_library);
+		if (game_library)
+		{
+			printf("Sys_GetGameAPI: SDL_LoadObject [%s]\n", (const char *)_library);
+		} else {
+			printf("Sys_GetGameAPI: SDL_LoadObject Error loading [%s]!!!\n",(const char *) _library);
+		}
+	
+	} else {
+#endif // NOT_WIN32
 	path = NULL;
+
 	while (1)
 	{
 		path = FS_NextPath(path);
-		if (!path)
+		if (!path) {
+			printf("Sys_GetGameAPI: Error! Couldn't find one anywhere!\n");
 			return NULL;		// couldn't find one anywhere
+		}
 		Com_sprintf(name, sizeof(name), "%s/%s", path, gamename);
 		game_library = SDL_LoadObject(name);
 		if (game_library)
 		{
+			printf("Sys_GetGameAPI: SDL_LoadObject [%s]\n", (const char *)name);
 			Com_DPrintf("SDL_LoadObject (%s)\n", name);
 			break;
+		} else {
+			printf("Sys_GetGameAPI: SDL_LoadObject Error loading [%s]!!!\n",(const char *) _library);
 		}
 	}
+#ifndef _WIN32
+  }
+#endif
 
 	GetGameAPI = (void *(*)(void *)) SDL_LoadFunction (game_library, "GetGameAPI");
 	if (!GetGameAPI)
@@ -45787,7 +45841,6 @@ void SDL_EventProc(SDL_Event *ev)
 bool VID_LoadRefresh()
 {
 	Com_Printf( "------- Video System restart -------\n", name );
-	printf( "------- Video System restart -------\n", name );
 
 	if ( reflib_active )
 		R_Shutdown();
@@ -53513,6 +53566,12 @@ nomodes:		/// при отсутствии modelist.txt формируем деф
 		_VID_NUM_MODES++;
 
 		vid_modes[_VID_NUM_MODES].width = 1280;
+		vid_modes[_VID_NUM_MODES].height = 720;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1280 960 ]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 1280;
 		vid_modes[_VID_NUM_MODES].height = 960;
 		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1280 960 ]");
 		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
@@ -53524,7 +53583,31 @@ nomodes:		/// при отсутствии modelist.txt формируем деф
 		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
 		_VID_NUM_MODES++;
 
+		vid_modes[_VID_NUM_MODES].width = 1366;
+		vid_modes[_VID_NUM_MODES].height = 768;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
 		vid_modes[_VID_NUM_MODES].width = 1600;
+		vid_modes[_VID_NUM_MODES].height = 900;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 1600;
+		vid_modes[_VID_NUM_MODES].height = 1200;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 1920;
+		vid_modes[_VID_NUM_MODES].height = 1080;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 1920;
 		vid_modes[_VID_NUM_MODES].height = 1200;
 		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[1600 1200]");
 		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
@@ -53532,6 +53615,24 @@ nomodes:		/// при отсутствии modelist.txt формируем деф
 
 		vid_modes[_VID_NUM_MODES].width = 2048;
 		vid_modes[_VID_NUM_MODES].height = 1536;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[2048 1536]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 2560;
+		vid_modes[_VID_NUM_MODES].height = 1080;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[2048 1536]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width = 2560;
+		vid_modes[_VID_NUM_MODES].height = 1440;
+		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[2048 1536]");
+		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
+		_VID_NUM_MODES++;
+
+		vid_modes[_VID_NUM_MODES].width =  3840;
+		vid_modes[_VID_NUM_MODES].height = 2160;
 		Com_sprintf (_resolutions[_VID_NUM_MODES], sizeof(_resolutions[_VID_NUM_MODES]), "[2048 1536]");
 		resolutions[_VID_NUM_MODES] = &_resolutions[_VID_NUM_MODES][0];
 		_VID_NUM_MODES++;
@@ -88039,6 +88140,74 @@ void Common_Init (int argc, char **argv)
 	// prepare enough of the subsystems to handle
 	// cvar and command buffer management
 	COM_InitArgv (argc, argv);
+
+// #######################################################################################################
+#ifdef PLATFORM_UNIX
+	char* _strExePath = SDL_GetBasePath();
+	printf("\nInit: Begin...\n");
+	printf("Init: Game start with path: %s\n", (const char *)_strExePath);
+#if defined(__OpenBSD__) || defined(__FreeBSD__)
+	int _isystempath = strncmp((const char *)_strExePath, (const char *) "/usr/local/bin/", (size_t) 15 );
+#elif defined(__NetBSD__)
+	int _isystempath = strncmp((const char *)_strExePath, (const char *) "/usr/pkg/bin/", (size_t) 13 );
+#else
+	int _isystempath = strncmp((const char *)_strExePath, (const char *) "/usr/bin/", (size_t) 9 );
+#endif // defined(__OpenBSD__) || defined(__FreeBSD__)
+	if( _isystempath == 0 ) {
+		sys_iSysPath = 1; // using system path
+	} else {
+		sys_iSysPath = 0; // using standarted path
+	}
+
+ 	// Path vars
+  	int sys_iGameBits  = (int)(CHAR_BIT * sizeof(void *));
+  	printf("Init: Running %d-bit version\n", sys_iGameBits);
+
+	// clean 
+	for (int i=0; i< 2048; i++) {
+		sys_strLibPath[i] = 0;
+
+	}
+
+  	// get library path
+#if defined(__OpenBSD__) || defined(__FreeBSD__)
+  	if( sys_iSysPath == 1 ) {
+    	strcpy(sys_strLibPath, (const char *)"/usr/local/lib/berserkerq2/");
+#elif defined(__NetBSD__)
+  	if( sys_iSysPath == 1 ) {
+		strcpy(sys_strLibPath, (const char *)"/usr/pkg/lib/berserkerq2/");
+#else
+  if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *)"/usr/lib/aarch64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/aarch64-linux-gnu/berserkerq2/"); 
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && (access((const char *) "/usr/lib/arm-linux-gnueabihf/berserkerq2/baseq2/libgame.so", F_OK)== 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/arm-linux-gnueabihf/berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/riscv64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/riscv64-linux-gnu/berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/s390x-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/s390x-linux-gnu/berserkerq2/"); 
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/powerpc64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/powerpc64-linux-gnu/berserkerq2/"); 
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/x86_64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/x86_64-linux-gnu/berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && (access((const char *) "/usr/lib/i386-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib/i386-linux-gnu/berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib64/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *) "/usr/lib64//berserkerq2/");
+  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && (access((const char *) "/usr/lib/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+    strcpy(sys_strLibPath, (const char *)"/usr/lib//berserkerq2/");
+#endif
+  } else if( sys_iSysPath == 0 ) {
+    printf("Init: Use local install.\n");
+  } else {
+    printf("Init: Error! Game libraries not ound!\n");
+    printf("Init: Failed to search game libraries installed!\nInit: Please reinstall the game.\n");
+  }
+  printf("Init: End.\n\n");
+  
+#endif // PLATFORM_UNIX
+// #######################################################################################################
+
+
 
 	Swap_Init ();
 	Cbuf_Init ();
