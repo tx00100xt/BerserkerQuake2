@@ -10309,6 +10309,7 @@ void Com_DPrintf (char *fmt, ...)
 	va_end (argptr);
 
 	Com_Printf ("^4%s", msg);
+	printf ("%s", (const char *) msg);
 }
 
 /*

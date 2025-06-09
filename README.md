@@ -1,7 +1,7 @@
 # Berserker@Quake2 Engine
 [![Build status](https://github.com/tx00100xt/SeriousSamClassic/actions/workflows/cibuild.yml/badge.svg)](https://github.com/tx00100xt/BerserkerQuake2/actions/)
 [![License: GPL v2](https://img.shields.io/badge/License-GPL_v2-blue.svg)](https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html)
-[![GitHub release (latest by date)](https://img.shields.io/github/v/release/tx00100xt/BerserkerQuake2)](https://github.com/tx00100xt/BerserkerQuake2/releases/tag/1.45.1-beta1)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/tx00100xt/BerserkerQuake2)](https://github.com/tx00100xt/BerserkerQuake2/releases/tag/1.45.1)
 [![Github downloads](https://img.shields.io/github/downloads/tx00100xt/BerserkerQuake2/total.svg?logo=github&logoColor=white&style=flat-square&color=E75776)](https://github.com/tx00100xt/BerserkerQuake2/releases/)
 
 Berserker@Quake2 engine that modernizes some elements of the Quake 2 graphical system.  
@@ -73,7 +73,7 @@ http://deponie.yamagi.org/quake2/idstuff/q2-3.20-x86-full-ctf.exe
 The content can be extracted using any utility for working with ZIP files.  
 
 If you have access to a copy of the game (either by CD or through Steam),  
-you can copy the **pak0-2.pak** files and **video** directory from the game   
+you can copy the **pak0-2.pak** files and **player,video** directory from the game   
 directory to the repository (put it in the **baseq2 repository directory**).  
 
 #### NOTE:
@@ -160,6 +160,7 @@ The file tree should be like this:
 │   ├── pak1.pak
 │   ├── pak2.pak
 │   ├── purepaks.lst
+│   ├── player
 │   └── video
 │       ├── end.cin
 │       ├── eou1_.cin
@@ -178,7 +179,9 @@ The file **purepaks.lst** contains the names of the packs that will be used in t
 Without it, the game will not start.  
 The file **modelist.txt** contains a list of allowed screen resolutions. You can edit it and add your own non-standard resolutions.  
 
-The configuration file (**q2b_config.cfg**), as well as save and cache files, will always be located in directory **~/.berserkerq2**.
+The configuration file (**q2b_config.cfg**), as well as save and cache files, will always be located in directory **~/.berserkerq2**.  
+
+Additional missions in the Linux/BSD version are not supported, as they require the presence of an external q2dedicated.exe must be exist in Quake2 folder.
 
 #### NOTE:
 All file and directory names must be in lower case.
