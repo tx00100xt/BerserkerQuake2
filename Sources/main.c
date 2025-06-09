@@ -2793,23 +2793,6 @@ void Sys_ConsoleOutput (char *string)
 }
 
 
-/*
-============
-FS_Gamedir
-
-Called to find where to write a file (demos, savegames, etc)
-============
-*/
-char *FS_Gamedir ()
-{
-	if (*fs_gamedir)
-		return fs_gamedir;
-	else
-		return BASEDIRNAME;
-}
-
-
-
 // Berserker: file system error handling, from MSDN
 #ifdef _WIN32
 char *FS_GetError(errno_t err)
@@ -9630,22 +9613,18 @@ void R_LoadScreenImages()
 	glfx_mask = GL_FindImage ("pics/effects/mask.tga", it_fx, true, 0, false, 0);
 	if (!glfx_mask) {
 		Com_Printf("^1Can't find pic: pics/effects/mask.tga\n");
-		printf("Can't find pic: pics/effects/mask.tga\n");
 	}
 	glfx_maskenv = GL_FindImage ("pics/effects/maskenv.tga", it_fx, true, 0, false, 0);
 	if (!glfx_maskenv){
 		Com_Printf("^1Can't find pic: pics/effects/maskenv.tga\n");
-		printf("Can't find pic: pics/effects/maskenv.tga\n");
 	}
 	glfx_drown = GL_FindImage ("pics/effects/drown.tga", it_fx, true, 0, false, 0);
 	if (!glfx_drown){
 		Com_Printf("^1Can't find pic: pics/effects/drown.tga\n");
-		printf("Can't find pic: pics/effects/drown.tga\n");
 	}
 	glfx_underwater = GL_FindImage ("pics/effects/underwater.tga", it_fx, true, 0, false, 0);
 	if (!glfx_underwater){
 		Com_Printf("^1Can't find pic: pics/effects/underwater.tga\n");
-		printf("Can't find pic: pics/effects/underwater.tga\n");
 	}
 	for (num_pains=0; num_pains<MAX_RFX_IMAGES; num_pains++)
 		glfx_pain[num_pains] = glfx_burn[num_pains] = NULL;
@@ -9659,7 +9638,6 @@ void R_LoadScreenImages()
 	}
 	if (!num_pains) {
 		Com_Printf("^1Can't find any 'pain' pic\n");
-		printf("Can't find any 'pain' pic\n");
 	}
 	for (num_burns=0; num_burns<MAX_RFX_IMAGES; num_burns++)
 	{
@@ -9670,7 +9648,6 @@ void R_LoadScreenImages()
 	}
 	if (!num_burns) {
 		Com_Printf("^1Can't find any 'burn' pic\n");
-		printf("Can't find any 'burn' pic\n");	
 	}
 }
 
@@ -10613,7 +10590,7 @@ FS_CreatePath
 
 Creates any directories needed to store the given filename
 ============
-*/
+//
 void	FS_CreatePath (char *path)
 {
 	char	*ofs, bak;
@@ -10628,7 +10605,7 @@ void	FS_CreatePath (char *path)
 		}
 	}
 }
-
+*/
 
 void KillZipCache(bool all)
 {
@@ -29118,20 +29095,98 @@ void FS_AddGameDirectory (char *dir)
 
 
 /*
+ * ================
+ * FS_AddHomeAsGameDirectory
+ *
+ * Use ~/.berserkerq2 as fs_gamedir.
+ * ================
+ */
+static void
+FS_AddHomeAsGameDirectory (char *dir) {
+#ifndef _WIN32
+	char		gdir[MAX_OSPATH];	/* Game directory. */
+	char           *homedir;		/* Home directory. */
+
+	if ((homedir = getenv ("HOME")) != NULL) {
+		Com_sprintf (gdir, sizeof(gdir), "%s/.berserkerq2/%s", homedir, dir);
+		FS_AddGameDirectory (gdir);
+	}
+#else
+	// TODO: add C:\Users\username\...\BerserkerQ2\dir to path here, to use for saving files
+#endif
+}
+
+
+//  Mkdir
+#ifndef _WIN32
+void
+Sys_Mkdir(char *path)
+{
+	mkdir(path, 0777);
+}
+
+void
+Sys_Rmdir(char *path)
+{
+	rmdir(path);
+}
+#else
+#include<errno.h>
+void Sys_Mkdir (char *path) {
+	int ret;
+
+	ret = _mkdir (path);
+	if (ret == 0)
+		Com_DPrintf("Create '%s' folder\n", path);
+	if (ret == -1) {
+		Com_DPrintf(S_COLOR_RED"Can't create '%s' folder\n", path);
+		if(errno == EEXIST)
+			Com_DPrintf(S_COLOR_RED"Каталог не был создан, так как dirname это имя существующего файла, каталога или устройства.\n");
+		if(errno == ENOENT)
+			Com_DPrintf(S_COLOR_RED"Путь не найден\n");
+		
+	}
+}
+void Sys_ChDir (char *path) {
+	_chdir (path);
+}
+#endif
+
+
+/*
+============
+FS_CreatePath
+
+Creates any directories needed to store the given filename
+============
+*/
+void FS_CreatePath (char *path) {
+	char	*ofs;
+
+	for (ofs = path + 1; *ofs; ofs++) {
+		if (*ofs == '/') {	// create the directory
+			*ofs = 0;
+			Sys_Mkdir (path);
+			*ofs = '/';
+		}
+	}
+}
+
+
+
+/*
 ================
 FS_SetGamedir
 
 Sets the gamedir and path to a different directory.
 ================
 */
-void FS_SetGamedir (char *dir)
-{
+void FS_SetGamedir (char *dir) {
 	searchpath_t	*next;
 
-	if (strstr(dir, "..") || strchr(dir, '/')
-		|| strchr(dir, '\\') || strchr(dir, ':') )
-	{
-		Com_Printf ("^3Gamedir should be a single filename, not a path\n");
+	if (strstr (dir, "..") || strstr (dir, "/")
+		|| strstr (dir, "\\") || strstr (dir, ":")) {
+		Com_Printf ("Gamedir should be a single filename, not a path\n");
 		return;
 	}
 
@@ -29142,11 +29197,12 @@ void FS_SetGamedir (char *dir)
 	{
 		if (fs_searchpaths->pack)
 		{
-			fclose (fs_searchpaths->pack->handle);
-			Z_Free (fs_searchpaths->pack);
+			fclose(fs_searchpaths->pack->handle);
+			Z_Free(fs_searchpaths->pack->files);
+			Z_Free(fs_searchpaths->pack);
 		}
 		next = fs_searchpaths->next;
-		Z_Free (fs_searchpaths);
+		Z_Free(fs_searchpaths);
 		fs_searchpaths = next;
 	}
 
@@ -29158,17 +29214,18 @@ void FS_SetGamedir (char *dir)
 
 	Com_sprintf (fs_gamedir, sizeof(fs_gamedir), "%s/%s", fs_basedir->string, dir);
 
-	if (!strcmp(dir,BASEDIRNAME) || (*dir == 0))
-	{
-		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO|CVAR_NOSET);
-		Cvar_FullSet ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
+	if (!strcmp (dir, BASEDIRNAME) || (*dir == 0)) {
+		Cvar_FullSet ("gamedir", "", CVAR_SERVERINFO | CVAR_NOSET);
+		Cvar_FullSet ("game", "", CVAR_LATCH | CVAR_SERVERINFO);
+		Com_DPrintf("FS_SetGamedir: dir[%s]\n", dir);
 	}
-	else
-	{
-		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO|CVAR_NOSET);
+	else {
+		Cvar_FullSet ("gamedir", dir, CVAR_SERVERINFO | CVAR_NOSET);
 		if (fs_cddir->string[0])
-			FS_AddGameDirectory (va("%s/%s", fs_cddir->string, dir) );
-		FS_AddGameDirectory (va("%s/%s", fs_basedir->string, dir) );
+			FS_AddGameDirectory (va ("%s/%s", fs_cddir->string, dir));
+		FS_AddGameDirectory (va ("%s/%s", fs_basedir->string, dir));
+		FS_AddHomeAsGameDirectory (dir);
+		Com_DPrintf("FS_SetGamedir: dir[%s]\n", dir);
 	}
 }
 
@@ -29367,6 +29424,18 @@ void FS_ExecAutoexec ()
 }
 
 
+bool modName(const char *gameDir) {
+
+	searchpath_t	*search;
+
+	for (search = fs_searchpaths; search; search = search->next)
+		if (strstr(search->filename, gameDir))
+			return true;
+
+	return false;
+}
+
+
 // Berserker: purepaks.lst загружается после загрузки *.cfg.
 // Поэтому, чтоб не загружать их из "левых" паков, сформируем дефолтный список.
 void FS_CreateDefaultPureList()
@@ -29376,10 +29445,12 @@ void FS_CreateDefaultPureList()
 	if(numpaks)
 		FreePakNames();	// Если уже были определены структуры paknames, то освободим память...
 
-	if (strcmp(fs_gamedir+2, BASEDIRNAME))	// если работает mod:
+	//if (strcmp(fs_gamedir+2, BASEDIRNAME)) {	// если работает mod:
+	if (modName("rogue") || modName("xatrix")) {
 		m = 2;
-	else
+	} else {
 		m = 1;
+	}
 
 	numpaks = 20;		// зарезервируем по 10 pak и по 10 pk2
 	paknames = (char **) Z_Malloc( sizeof( char * ) * ( numpaks * m + 1 ), true );
@@ -30325,8 +30396,10 @@ void	FS_LoadPureLists()
 
 	FS_LoadPureList(BASEDIRNAME, 0);
 	if (fs_pure->value == 2)
-		if (strcmp(fs_gamedir+2, BASEDIRNAME))	// если работает mod:
+		//if (strcmp(fs_gamedir+2, BASEDIRNAME)) {	// если работает mod:
+		if (modName("rogue") || modName("xatrix")) {
 			FS_LoadPureList(fs_gamedir, 1);
+		}
 
 	// Объединим списки
 	int i, j;
@@ -30392,6 +30465,25 @@ void FS_ResetFilesystem_f ()
 	memset(fs_cache, 0, sizeof(fs_cache));
 }
 
+
+/*
+============
+FS_Gamedir
+
+Called to find where to write a file (demos, savegames, etc)
+============
+*/
+char *FS_Gamedir (void) {
+	if (*fs_gamedir) {
+		Com_DPrintf("FS_Gamedir: fs_gamedir[%s]\n", fs_gamedir);
+		return fs_gamedir;
+	}
+	else {
+		return BASEDIRNAME;
+	}
+}
+
+
 void FS_InitFilesystem ()
 {
 	FS_ResetFilesystem_f();
@@ -30423,7 +30515,10 @@ void FS_InitFilesystem ()
 	//
 	// start up with BaseQ2 by default
 	//
-	FS_AddGameDirectory (va("%s/%s", fs_basedir->string, BASEDIRNAME) );
+	// FS_AddGameDirectory (va("%s/%s", fs_basedir->string, BASEDIRNAME) );
+	FS_AddGameDirectory (va ("%s/"BASEDIRNAME, fs_basedir->string));
+	//	
+	FS_AddHomeAsGameDirectory (BASEDIRNAME);
 
 	// any set gamedirs will be freed up to here
 	fs_base_searchpaths = fs_searchpaths;
@@ -30432,6 +30527,13 @@ void FS_InitFilesystem ()
 	fs_gamedirvar = Cvar_Get ("game", "", CVAR_LATCH|CVAR_SERVERINFO);
 	if (fs_gamedirvar->string[0])
 		FS_SetGamedir (fs_gamedirvar->string);
+
+	/* Create directory if it does not exist. */
+	Sys_Mkdir (fs_gamedir);
+
+	Com_Printf ("\n");
+	Com_Printf ("Using [%s] for writing\n", fs_gamedir);
+
 }
 
 
@@ -31527,10 +31629,12 @@ base:		dirCount = Sys_FindFiles(va("./%s/maps", BASEDIRNAME), str_map_, dirFiles
 		else
 		{
 			stop = true;
-			if (strcmp(fs_gamedir+2, BASEDIRNAME))	// если работает mod:
+			//if (strcmp(fs_gamedir+2, BASEDIRNAME)) {	// если работает mod:
+			if (modName("rogue") || modName("xatrix")) {
 				dirCount = Sys_FindFiles(va("%s/maps", fs_gamedir), str_map_, dirFiles, MAX_MAPS, true, false);
-			else
+			} else {
 				goto base;
+			}
 		}
 
 		for (i = 0; i < dirCount; i++)
@@ -50924,7 +51028,8 @@ void Mod_LoadAliasMD3Model ( model_t *mod, void *buffer, float scale, bool inver
 		else
 			Com_sprintf (cachename, sizeof(cachename), "%s/cache/%s_%i", FS_Gamedir(), mod->name, i);
 
-		if (strcmp(fs_gamedir+2, BASEDIRNAME))		// именно через сравнение строк: чтобы не прокатило +set game baseq2
+		//if (strcmp(fs_gamedir+2, BASEDIRNAME))		// именно через сравнение строк: чтобы не прокатило +set game baseq2
+		if (modName("rogue") || modName("xatrix")) 
 		{	// если работает мод
 			char	basecachename[MAX_QPATH];
 
@@ -51504,7 +51609,8 @@ badM:		Com_DPrintf("Warning: %s has no valid skin\n", mod->name);
 	else
 		Com_sprintf (cachename, sizeof(cachename), "%s/cache/%s", FS_Gamedir(), mod->name);
 
-	if (strcmp(fs_gamedir+2, BASEDIRNAME))		// именно через сравнение строк: чтобы не прокатило +set game baseq2
+	//if (strcmp(fs_gamedir+2, BASEDIRNAME))		// именно через сравнение строк: чтобы не прокатило +set game baseq2
+	if (modName("rogue") || modName("xatrix")) 
 	{	// если работает мод
 		char	basecachename[MAX_QPATH];
 
@@ -62905,10 +63011,12 @@ base:	dirCount = Sys_FindFiles(va("./%s/%s", BASEDIRNAME, path2), ext2, dirFiles
 	else
 	{
 		stop = true;
-		if (strcmp(fs_gamedir+2, BASEDIRNAME))	// если работает mod:
+		//if (strcmp(fs_gamedir+2, BASEDIRNAME)) {	// если работает mod:
+		if (modName("rogue") || modName("xatrix")) {
 			dirCount = Sys_FindFiles(va("%s/%s", fs_gamedir, path2), ext2, dirFiles, MAX_FILES, true, false);
-		else
+		} else {
 			goto base;
+		}
 	}
 
 	for (i = 0; i < dirCount; i++)
@@ -71523,7 +71631,8 @@ p=out->polys;
 // create the cache directory
 	Com_sprintf (cachename, sizeof(cachename), "%s/cache/%s", FS_Gamedir(), loadmodel->name);
 
-	if (strcmp(fs_gamedir+2, BASEDIRNAME))		// именно через сравнение строк: чтобы не прокатило +set game baseq2
+	//if (strcmp(fs_gamedir+2, BASEDIRNAME))		// именно через сравнение строк: чтобы не прокатило +set game baseq2
+	if (modName("rogue") || modName("xatrix"))
 	{	// если работает мод
 		char	basecachename[MAX_QPATH];
 
@@ -82964,10 +83073,12 @@ base:		dirCount = Sys_FindFiles(va("./%s/demos", BASEDIRNAME), str_dm_, dirFiles
 		else
 		{
 			stop = true;
-			if (strcmp(fs_gamedir+2, BASEDIRNAME))	// если работает mod:
+			//if (strcmp(fs_gamedir+2, BASEDIRNAME)) {	// если работает mod:
+			if (modName("rogue") || modName("xatrix")) {
 				dirCount = Sys_FindFiles(va("%s/demos", fs_gamedir), str_dm_, dirFiles, MAX_DEMOS, true, false);
-			else
+			} else {
 				goto base;
+			}
 		}
 
 		for (i = 0; i < dirCount; i++)

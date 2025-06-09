@@ -5,8 +5,6 @@ project(berserkerq2 LANGUAGES C)
 ###      Options section       ###
 ##################################
 
-cmake_policy(SET CMP0177 NEW)
-
 # Use system SDL2 is on by default
 option(USE_SYSTEM_SDL2 "Use systems sdl2 development files" On)
 option(USE_SYSTEM_ZLIB "Use systems zlib development files" On)
@@ -63,6 +61,12 @@ endif()
 
 if(LINUX)
     set(CMAKE_OS_NAME "GNU/Linux" CACHE STRING "Operating system name" FORCE)
+    file(READ "/etc/os-release" OS_RELEASE)
+    if(OS_RELEASE MATCHES "ID=alpine")
+      message(STATUS "Alpine Linux detected")
+      set(CMAKE_OS_NAME "Alpine" CACHE STRING "Operating system name" FORCE)
+    endif()
+
     ## Check for Debian GNU/Linux
     find_file(DEBIAN_FOUND debian_version debconf.conf
         PATHS /etc
@@ -193,7 +197,7 @@ find_package(OpenGL)
 if(OpenGL_FOUND)
   message(STATUS "...OpenGL library found")
   include_directories(${OpenGL_INCLUDE_DIRS})
-  if(NOT FREEBSD)
+  if(NOT FREEBSD AND NOT CMAKE_OS_NAME STREQUAL "Alpine" AND NOT RPIOS)
     set(OpenGL_LIBS OpenGL::OpenGL)
   else()
     set(OpenGL_LIBS OpenGL::GL)
@@ -367,7 +371,7 @@ set(CMAKE_ADD_TARGET_DIR "${CMAKE_SOURCE_DIR}/../")
 ### End Compiler flags section ###
 ##################################
 
-if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "AppleClang")
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID MATCHES "AppleClang")
 	# This section and the like are for flags/defines that can be shared between 
 	# c and c++ compile options
 	add_compile_options(-Wall)
@@ -444,13 +448,17 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_CXX_
         endif()
 
 	# TODO fix these warnings
-	# add_compile_options(-Wno-format-security)
+	add_compile_options(-Wno-stringop-truncation)
+	add_compile_options(-Wno-format-security)
 	add_compile_options(-Wno-switch)
-	# add_compile_options(-Wno-char-subscripts)
-	# add_compile_options(-Wno-unknown-pragmas)
-	# add_compile_options(-Wno-unused-variable) # TODO: maybe only enable this for Entities
-	# add_compile_options(-Wno-unused-value)    # same here (the Scripts generate tons of unused variables and values)
+	add_compile_options(-Wno-char-subscripts)
+	add_compile_options(-Wno-unused-result)
+	add_compile_options(-Wno-maybe-uninitialized)
+	add_compile_options(-Wno-unknown-pragmas)
+	add_compile_options(-Wno-unused-variable) # TODO: maybe only enable this for Entities
+	add_compile_options(-Wno-unused-value)    # same here (the Scripts generate tons of unused variables and values)
 	add_compile_options(-Wno-missing-braces)
+	add_compile_options(-Wno-aggressive-loop-optimizations)
 	# MESSAGE(WARNING, "re-enable some of the warnings some day!")
 
 	if(MACOSX)
