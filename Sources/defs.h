@@ -117,7 +117,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
   #define PLATFORM_UNKNOWN 1
 #endif
 
-#if PLATFORM_LINUX || PLATFORM_MACOSX
+#if PLATFORM_LINUX || PLATFORM_MACOSX || PLATFORM_FREEBSD
   #ifndef PLATFORM_UNIX
     #define PLATFORM_UNIX 1
   #endif

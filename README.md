@@ -160,6 +160,7 @@ The file tree should be like this:
 │   ├── pak1.pak
 │   ├── pak2.pak
 │   ├── purepaks.lst
+│   ├── cache
 │   ├── player
 │   └── video
 │       ├── end.cin
@@ -187,6 +188,13 @@ Additional missions in the Linux/BSD version are not supported, as they require 
 All file and directory names must be in lower case.
 
 ### Running the game
+Before the first launch, it is recommended to unpack the **cache** directory  
+from the **bsq2-10.pk2** archive into **baseq2** game data directory.
+
+```
+cd <place where bsq2-10.pk2>
+unzip -LL "bsq2-10.pk2" "cache/*" -d ~/.berserkerq2/baseq2
+```
 After building and placing the game data, you can launch the games.  
 Type this in your terminal:  
 
