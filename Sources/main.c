@@ -20041,7 +20041,7 @@ bool Con_DrawConsole (float frac)
 	SCR_AddDirtyPoint (viddef.width-1,lines-1);
 
 ///	Com_sprintf (version, sizeof(version), "Version %4.2f", VERSION);
-	Com_sprintf (version, sizeof(version), "Release 1.45 (%s)", __DATE__);
+	Com_sprintf (version, sizeof(version), "Release 1.45.1 (%s)", __DATE__);
 	int vlen = strlen(version);
 	for (x=0 ; x<vlen ; x++)
 		Draw_Char16 (viddef.width-8-(vlen-x)*16, 8, 128 + version[x] );

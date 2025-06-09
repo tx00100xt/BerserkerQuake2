@@ -9,18 +9,20 @@
 #############################################################################
 
 
+# Check OS
+OS=$(shell lsb_release -si)
+
 # Check OS type.
 OSTYPE := $(shell uname -s)
 
 # this nice line comes from the linux kernel makefile
 ARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc/ -e s/sparc64/sparc/ -e s/arm.*/arm/ -e s/sa110/arm/ -e s/alpha/axp/)
 
-
 #############################################################################
 # OPTIONS
 #############################################################################
 
-VERSION=1.45
+VERSION=1.45.1
 ENGINE=berserkerq2
 GAMELIB=libgame
 BUILD_DEBUG_DIR=build_debug
@@ -63,9 +65,12 @@ else ifeq ($(OSTYPE),OpenBSD)
   LDFLAGS_ENGINE=-L/usr/local/lib -L/usr/X11R6/lib -lminizip -lm -lGL -lvorbis -lvorbisfile -lz -lSDL2 -lpng -ljpeg -Wl,-rpath,$$ORIGIN/lib
 endif
 
+
 ifeq ($(OSTYPE),Linux)
   INSTALL_PREFFIX=/usr
 else ifeq ($(OSTYPE),OpenBSD)
+  INSTALL_PREFFIX=/usr/local
+else ifeq ($(OSTYPE),FreeBSD)
   INSTALL_PREFFIX=/usr/local
 endif
 
@@ -73,13 +78,36 @@ ifeq ($(OSTYPE),Linux)
   ifeq ($(ARCH),i386)
     INSTALL_LIB=$(INSTALL_PREFFIX)/lib
   else ifeq ($(ARCH),x86_64)
-    INSTALL_LIB=$(INSTALL_PREFFIX)/lib
+    INSTALL_LIB=$(INSTALL_PREFFIX)/lib64
   else ifeq ($(ARCH),amd64)
     INSTALL_LIB=$(INSTALL_PREFFIX)/lib64
   endif
 else ifeq ($(OSTYPE),OpenBSD)
   INSTALL_LIB=$(INSTALL_PREFFIX)/lib
 endif
+
+ifeq ($(OS),Debian)
+ifeq ($(OS),Ubuntu)
+ifeq ($(OS),Mint)
+  ifeq ($(ARCH),i386)
+    INSTALL_LIB=$(INSTALL_PREFFIX)/lib/i386-linux-gnu
+  else ifeq ($(ARCH),x86_64)
+    INSTALL_LIB=$(INSTALL_PREFFIX)/lib/x86_64-linux-gnu
+  else ifeq ($(ARCH),aarch64)
+    INSTALL_LIB=$(INSTALL_PREFFIX)/lib/aarch64-linux-gnu
+  else ifeq ($(ARCH),armhf)
+    INSTALL_LIB=$(INSTALL_PREFFIX)/lib/arm-linux-gnueabihf
+  else ifeq ($(ARCH),riscv64)
+    INSTALL_LIB=$(INSTALL_PREFFIX)/lib/riscv64-linux-gnu
+  else ifeq ($(ARCH),powerpc64)
+    INSTALL_LIB=$(INSTALL_PREFFIX)/lib/powerpc64-linux-gnu
+  else ifeq ($(ARCH),s390)
+    INSTALL_LIB=$(INSTALL_PREFFIX)/lib/lib/s390x-linux-gnu
+  endif
+endif
+endif
+endif
+
 
 INSTALL_BIN=$(INSTALL_PREFFIX)/bin
 
@@ -189,7 +217,8 @@ install:
 	@echo Copying files to your system dir ...
 	@cp -vr $(BUILD_RELEASE_DIR)/$(BINDIR)/$(ENGINE) $(INSTALL_BIN)
 	@mkdir -p $(INSTALL_LIB)/$(ENGINE)
-	@cp -vr $(BUILD_RELEASE_DIR)/$(BINDIR)/$(BASEDIR)/$(GAMELIB).$(SHLIBEXT) $(INSTALL_LIB)/$(ENGINE)
+	@mkdir -p $(INSTALL_LIB)/$(ENGINE)/$(BASEDIR)
+	@cp -vr $(BUILD_RELEASE_DIR)/$(BINDIR)/$(BASEDIR)/$(GAMELIB).$(SHLIBEXT) $(INSTALL_LIB)/$(ENGINE)/$(BASEDIR)
 	@echo .
 
 install.local:
