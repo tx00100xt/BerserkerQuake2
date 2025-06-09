@@ -62,7 +62,7 @@ sudo apt-get install libjpeg-dev libpng-dev libminizip-dev zlib1g-dev
 Type this in your terminal:
 
 ```
-git clone https://github.com/tx00100xt/Berserker@Quake2.git
+git clone https://github.com/tx00100xt/BerserkerQuake2.git
 ```
 
 #### Copy official game data (optional)
