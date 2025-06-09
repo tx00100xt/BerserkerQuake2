@@ -73,11 +73,11 @@ http://deponie.yamagi.org/quake2/idstuff/q2-3.20-x86-full-ctf.exe
 The content can be extracted using any utility for working with ZIP files.  
 
 If you have access to a copy of the game (either by CD or through Steam),  
-you can copy the (**pak0.pak-2.pak**) files and (**player,video**) directory from the game   
+you can copy the (**pak0.pak-pak2.pak**) files and (**player,video**) directory from the game   
 directory to the repository (put it in the **baseq2 repository directory**).  
 
 #### NOTE:
-The (**pak0.pak-2.pak**) files and (**player,video**) directory must have lowercase names.
+The (**pak0.pak-pak2.pak**) files and (**player,video**) directory must have lowercase names.
 
 #### Building with CMakeLists.txt
 
