@@ -1,0 +1,152 @@
+{
+"classname" "worldspawn"
+"ambient" "0.05 0.05 0.05"
+"sky_viewcenter" "-180.56 -111.81 57.19"
+"sky_origin" "-17.56 7.94 -443.44"
+"sky_angle" "-60.00"
+"sky_scale" "0.20"
+}
+//Light 0
+{
+"classname" "light"
+"light" "500"
+"origin" "64 64 -128"
+"color" "1.00 0.70 0.00"
+"angles" "80 0 0"
+"cone" "1.000000"
+"filter" "129"
+"filter2" "133"
+}
+//Light 1
+{
+"classname" "light"
+"light" "500"
+"origin" "-128 -128 128"
+}
+//Light 2
+{
+"classname" "light"
+"origin" "40 28 -376"
+"angles" "90 0 0"
+}
+//Light 3
+{
+"classname" "light"
+"light" "150"
+"origin" "-80 147 -133"
+"speed" "111.000000 222.000000 333.000000"
+"filter" "2"
+}
+//Linked light 0
+{
+"classname" "light"
+"light" "100"
+"origin" "61 -61 -41"
+"color" "0.00 0.00 1.00"
+"angles" "-339 312 0"
+"cone" "1.000000"
+"filter" "1"
+"label" "l2"
+}
+//Linked light 1
+{
+"classname" "light"
+"light" "150"
+"origin" "137 -115 -161"
+"color" "0.00 1.00 0.00"
+"angles" "45 0 90"
+"cone" "1.000000"
+"filter" "8"
+"label" "l1"
+}
+//Linked brush 0
+{
+"classname" "_null"
+"model" "*3"
+"label" "l1"
+}
+//Linked brush 1
+{
+"classname" "_null"
+"model" "*4"
+"label" "l2"
+"nodraw" "1"
+}
+//Emitter 0
+{
+"classname" "emit"
+"origin" "117 62 -158"
+"angles" "-73 238 32"
+"speed" "0 0 3"
+"cone" "0.200000"
+"filter" "2"
+"startcolor" "1.00 0.50 0.00"
+"endcolor" "0.00 0.50 1.00"
+"lifetime" "2.000000"
+"gravity" "-1"
+}
+//Emitter 1
+{
+"classname" "emit"
+"origin" "104 -117 -150"
+"angles" "-90 0 128"
+"speed" "0 0 1"
+"cone" "0.200000"
+"style" "2"
+"filter" "3"
+"lifetime" "0.400000"
+"label" "l1"
+}
+//Emitter 2
+{
+"classname" "emit"
+"origin" "55 -55 -40"
+"angles" "45 -45 128"
+"speed" "0 0 32"
+"cone" "0.200000"
+"filter" "6"
+"lifetime" "2.000000"
+"gravity" "16"
+"label" "l2"
+}
+{
+"classname" "decal"
+"origin" "11.280312 98.621948 -247.467926"
+"angle" "90.000000"
+"filter" "128"
+"volume" "32"
+"dir" "1.00 0.00 0.00"
+}
+{
+"classname" "misc_model"
+"origin" "100.562500 -116.812500 -164.187500"
+"angles" "0.000000 180.000000 0.000000"
+"model" "models/objects/camera/tris.md2"
+"label" "l1"
+"spawnflags" "2"
+}
+{
+"classname" "misc_model"
+"origin" "49.000000 -44.000000 -18.000000"
+"model" "models/objects/camera/tris.md2"
+"label" "l2"
+}
+{
+"classname" "misc_model"
+"origin" "-37.937500 8.812500 -503.812500"
+"model" "models/monsters/bitch/tris.md2"
+"label" "SkyModel"
+"frame" "89"
+"frame_end" "98"
+"spawnflags" "2"
+}
+{
+"classname" "misc_model"
+"origin" "62.562500 14.812500 -446.437500"
+"angles" "10.000000 180.000000 0.000000"
+"model" "models/monsters/flyer/tris.md2"
+"label" "SkyModel"
+"frame" "87"
+"frame_end" "88"
+"spawnflags" "2"
+}

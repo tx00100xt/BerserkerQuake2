@@ -1,0 +1,3 @@
+alphatest
+nodetailbump
+castshadow

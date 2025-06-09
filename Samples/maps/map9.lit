@@ -1,0 +1,39 @@
+{
+"classname" "worldspawn"
+"ambient" "0.05 0.05 0.05"
+}
+//Light 0
+{
+"classname" "light"
+"radius" "500 2000 500"
+"origin" "126 305 106"
+"color" "1.00 0.00 0.00"
+"angles" "0 -90 0"
+"speed" "0.000000 0.000000 400.000000"
+"cone" "1.000000"
+"style" "1"
+"filter" "31"
+}
+//Light 1
+{
+"classname" "light"
+"light" "170"
+"origin" "123 432 102"
+"color" "1.00 0.00 0.00"
+"style" "1"
+"noshadow2" "1"
+}
+//Linked brush 0
+{
+"classname" "_null"
+"model" "*1"
+"label" "vent"
+}
+{
+"classname" "misc_model"
+"origin" "0.000000 -28.000000 0.000000"
+"angles" "0.000000 0.000000 -90.000000"
+"model" "models/mapobjects/fan0.md3"
+"label" "vent"
+"noise" "map9/vent"
+}

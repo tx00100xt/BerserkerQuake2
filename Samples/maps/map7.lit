@@ -1,0 +1,134 @@
+{
+"classname" "worldspawn"
+"ambient" "0.10 0.10 0.10"
+}
+//Light 0
+{
+"classname" "light"
+"radius" "100 100 1000"
+"origin" "0 248 200"
+"color" "1.00 0.00 0.00"
+"style" "32"
+"targetname" "l1"
+"spawnflags" "1"
+}
+//Light 1
+{
+"classname" "light"
+"radius" "100 100 1000"
+"origin" "0 128 200"
+"color" "1.00 0.00 0.00"
+"style" "32"
+"targetname" "l1"
+"spawnflags" "1"
+}
+//Light 2
+{
+"classname" "light"
+"radius" "100 100 1000"
+"origin" "0 -128 200"
+"color" "0.00 1.00 0.00"
+"style" "33"
+"targetname" "l2"
+"spawnflags" "1"
+}
+//Light 3
+{
+"classname" "light"
+"radius" "100 100 1000"
+"origin" "0 -248 200"
+"color" "0.00 1.00 0.00"
+"style" "33"
+"targetname" "l2"
+"spawnflags" "1"
+}
+//Light 4
+{
+"classname" "light"
+"radius" "100 100 1000"
+"origin" "-128 0 200"
+"color" "1.00 1.00 0.00"
+"style" "34"
+"targetname" "t4"
+"spawnflags" "1"
+}
+//Light 5
+{
+"classname" "light"
+"radius" "100 100 1000"
+"origin" "-248 0 200"
+"color" "1.00 1.00 0.00"
+"style" "34"
+"targetname" "t4"
+"spawnflags" "1"
+}
+//Light 6
+{
+"classname" "light"
+"radius" "100 100 1000"
+"origin" "248 0 200"
+"color" "0.00 0.00 1.00"
+"style" "35"
+"targetname" "t6"
+"spawnflags" "1"
+}
+//Light 7
+{
+"classname" "light"
+"radius" "100 100 1000"
+"origin" "128 0 200"
+"color" "0.00 0.00 1.00"
+"style" "35"
+"targetname" "t6"
+"spawnflags" "1"
+}
+//Light 8
+{
+"classname" "light"
+"light" "1000"
+"origin" "0 0 752"
+"color" "0.50 0.50 0.50"
+}
+//Emitter 0
+{
+"classname" "emit"
+"origin" "-117 -119 258"
+"angles" "-78 0 333"
+"speed" "0 48 32"
+"cone" "0.100000"
+"filter" "4"
+"lifetime" "4.000000"
+"gravity" "8"
+}
+{
+"classname" "decal"
+"origin" "-86.213318 168.204407 53.616440"
+"angle" "45.000000"
+"filter" "128"
+"volume" "32"
+"dir" "0.00 -1.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "168.137054 81.066391 58.551613"
+"angle" "-45.000000"
+"filter" "131"
+"volume" "32"
+"dir" "-1.00 0.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "-174.980804 -86.563873 63.095329"
+"angle" "45.000000"
+"filter" "130"
+"volume" "32"
+"dir" "1.00 0.00 0.00"
+}
+{
+"classname" "decal"
+"origin" "82.435204 -174.968918 55.664440"
+"angle" "-45.000000"
+"filter" "129"
+"volume" "32"
+"dir" "0.00 1.00 0.00"
+}
