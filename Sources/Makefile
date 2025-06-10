@@ -37,9 +37,13 @@ CLIENT_DIR=.
 
 
 CC?=gcc
-BASE_CFLAGS?=-Wno-missing-braces -Wno-switch -Wno-unused-variable -Wno-maybe-uninitialized -Wno-unused-variable -Wno-unused-value -Wno-stringop-overflow
-BASE_CFLAGS+=-Wno-stringop-truncation -Wno-format-security -Wno-char-subscripts -Wno-unused-result -Wno-unknown-pragmas -Wno-aggressive-loop-optimizations
-
+ifeq ($(OSTYPE),Linux)
+  BASE_CFLAGS?=-Wno-missing-braces -Wno-switch -Wno-unused-variable -Wno-maybe-uninitialized -Wno-unused-variable -Wno-unused-value -Wno-stringop-overflow
+  BASE_CFLAGS+=-Wno-stringop-truncation -Wno-format-security -Wno-char-subscripts -Wno-unused-result -Wno-unknown-pragmas -Wno-aggressive-loop-optimizations
+else ifeq ($(OSTYPE),OpenBSD)
+  BASE_CFLAGS?=-Wno-missing-braces -Wno-switch -Wno-unused-variable -Wno-unused-variable -Wno-unused-value
+  BASE_CFLAGS+=-Wno-format-security -Wno-char-subscripts -Wno-unused-result -Wno-unknown-pragmas
+endif
 
 DEBUG_CFLAGS=$(BASE_CFLAGS) -g -ggdb -Wall -pipe
 
