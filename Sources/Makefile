@@ -9,11 +9,13 @@
 #############################################################################
 
 
-# Check OS
-OS=$(shell lsb_release -si)
-
 # Check OS type.
 OSTYPE := $(shell uname -s)
+
+# Check OS
+ifeq ($(OSTYPE),Linux)
+OS=$(shell lsb_release -si)
+endif
 
 # this nice line comes from the linux kernel makefile
 ARCH := $(shell uname -m | sed -e s/i.86/i386/ -e s/sun4u/sparc/ -e s/sparc64/sparc/ -e s/arm.*/arm/ -e s/sa110/arm/ -e s/alpha/axp/)

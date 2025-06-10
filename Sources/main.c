@@ -39897,7 +39897,7 @@ void *Sys_GetGameAPI (void *parms)
 		for(int i=0; i<2048; i++) {
 			_library[i] = 0;
 		}
-#ifdef PLATFORM_FREEBSD
+#ifdef __FreeBSD__
 		dlerror(); // need for clean Undefined symbol "_nss_cache_cycle_prevention_function" message
 #endif
 		strcpy(_library, (const char *)sys_strLibPath);
