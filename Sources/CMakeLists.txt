@@ -448,21 +448,24 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_CO
         endif()
 
 	# TODO fix these warnings
-	add_compile_options(-Wno-stringop-truncation)
+
+	if(NOT FREEBSD)
+		add_compile_options(-Wno-stringop-truncation)
+		add_compile_options(-Wno-format-overflow)
+		add_compile_options(-Wno-restrict)
+		add_compile_options(-Wno-maybe-uninitialized)
+		add_compile_options(-Wno-aggressive-loop-optimizations)
+		add_compile_options(-Wno-stringop-overflow)
+	endif()
 	add_compile_options(-Wno-format-security)
 	add_compile_options(-Wno-switch)
 	add_compile_options(-Wno-char-subscripts)
 	add_compile_options(-Wno-unused-result)
-	add_compile_options(-Wno-maybe-uninitialized)
 	add_compile_options(-Wno-unknown-pragmas)
 	add_compile_options(-Wno-unused-variable) # TODO: maybe only enable this for Entities
 	add_compile_options(-Wno-unused-value)    # same here (the Scripts generate tons of unused variables and values)
 	add_compile_options(-Wno-missing-braces)
-	add_compile_options(-Wno-aggressive-loop-optimizations)
-	add_compile_options(-Wno-stringop-overflow)
 	add_compile_options(-Wno-unused-but-set-variable)
-	add_compile_options(-Wno-format-overflow)
-	add_compile_options(-Wno-restrict)
 	# MESSAGE(WARNING, "re-enable some of the warnings some day!")
 
 	if(MACOSX)
