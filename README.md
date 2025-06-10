@@ -48,8 +48,6 @@ libraries installed.
 On some Linux, like Gentoo, you can use libjpeg (v62). 
 In Debian based Linux use libjpeg (v8).
 
-### Linux and OpenBSD
-
 For Debian based linux type this in your terminal:
 ```
 sudo apt-get update
@@ -220,7 +218,6 @@ Supported OS
 -----------
 * `Linux`
 * `FreeBSD`
-* `OpenBSD`
 * `Raspberry PI OS`
 
 ### Build status
