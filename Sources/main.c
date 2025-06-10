@@ -6450,15 +6450,19 @@ void ApplyChanges( void *unused )
 	Cvar_Set( "r_texturealphamode", (char *)alphas[s_alpha_list.curvalue] );
 	Cvar_ForceSetValue( "r_diffuse_compression", s_compression_box.curvalue );
 	Cvar_ForceSetValue( "r_bump_compression", s_bump_compression_box.curvalue );
-	if(s_anisotropy_slider.curvalue >= 2)
+	if(s_anisotropy_slider.curvalue >= 2) {
 		Cvar_SetValue( "r_anisotropy", pow(2.0, s_anisotropy_slider.curvalue-1.0) );
-	else
+	} else {
 		Cvar_SetValue( "r_anisotropy", 0 );
-	if (gl_config.arb_multisample)
-		if(s_antialias_slider.curvalue > 1)
+	}
+
+	if (gl_config.arb_multisample) {
+		if(s_antialias_slider.curvalue > 1) {
 			Cvar_ForceSetValue( "r_multiSamples", pow(2.0, s_antialias_slider.curvalue-1.0) );
-		else
+		} else {
 			Cvar_ForceSetValue( "r_multiSamples", 1 );
+		}
+	}
 
 	/*
 	** update appropriate stuff if we're running OpenGL has been modified
@@ -10541,16 +10545,20 @@ void SCR_CalcVrect ()
 {
 	int		size;
 
-	if (!r_simple->value)
-		if (scr_viewsize->value != 100)
+	if (!r_simple->value) {
+		if (scr_viewsize->value != 100) {
 			Cvar_Set("viewsize", "100");
+		}
+	}
 	else
 	{
 		// bound viewsize
-		if (scr_viewsize->value < 40)
+		if (scr_viewsize->value < 40) {
 			Cvar_Set ("viewsize","40");
-		if (scr_viewsize->value > 100)
+		}
+		if (scr_viewsize->value > 100) {
 			Cvar_Set ("viewsize","100");
+		}
 	}
 
 	size = scr_viewsize->value;
@@ -10782,8 +10790,10 @@ zip_ch:							memcpy(&pf, &ZipCache[i], sizeof(zipfile_t));		// Нашли уж�
 					}
 				}
 				strcpy(&ZipCache[slot].pak_name[0], pak->filename);	// Если не нашли zip в кэше, откроем его...
-				if (!PackFileOpen (&ZipCache[slot]))
+				if (!PackFileOpen (&ZipCache[slot])) {
 					Com_Error(ERR_FATAL, "Error opening pk2-file: %s", pak->filename);
+					printf("FS_FOpenFile: Error opening pk2-file: %s\n", (const char *)pak->filename);
+				}
 				memcpy(&pf, &ZipCache[slot], sizeof(zipfile_t));
 				last_zip_number = slot;
 
@@ -10821,12 +10831,15 @@ clc:			if(test)
 						if (!b_stricmp (pak->files[i].name, filename))
 						{	// found it!
 							file_from_pak = 1;
-							if(!test)
+							if(!test) {
 								Com_DPrintf ("PakFile: %s : %s\n", pak->filename, filename);
+							}
 							// open a new file on the pakfile
 							*file = FS_Fopen (pak->filename, "rb");
-							if (!*file)
+							if (!*file) {
 								Com_Error (ERR_FATAL, "Couldn't reopen %s", pak->filename);
+								printf ("FS_FOpenFile: Error! Couldn't reopen %s", (const char *)pak->filename);
+							}
 							fseek (*file, pak->files[i].filepos, SEEK_SET);
 							return pak->files[i].filelen;
 						}
@@ -10930,20 +10943,22 @@ int FS_LoadFile (char *path, void **buffer)
 	bool	ovr = (fs_cache_number >= MAX_FILES);
 	bool	tst = (buffer == NULL);
 
-	if (ovr)
+	if (ovr) {
 		Com_DPrintf("FS_LoadFile: MAX_FILES = %i overflow\n", MAX_FILES);
+	}
 
 	buf = NULL;	// quiet compiler warning
 	h = NULL;
 	unsigned	hash = Com_HashKey(path);
 
 	// look for it (в кэш-списке файлов)
-	for (i=0 ; i<fs_cache_number ; i++)
-		if (fs_cache[i].hash == hash)
+	for (i=0 ; i<fs_cache_number ; i++) {
+		if (fs_cache[i].hash == hash) {
 			if (!b_stricmp(fs_cache[i].name, path))
 			{	// Нашли в кэше!
-				if (tst)
+				if (tst) {
 					return fs_cache[i].len;
+				}
 				else
 				{
 					len = FS_FOpenFile (path, &h, false, fs_cache[i].pak);
@@ -10951,6 +10966,8 @@ int FS_LoadFile (char *path, void **buffer)
 					goto m1;
 				}
 			}
+		}
+	}
 
 // look for it in the filesystem or pack files
 	len = FS_FOpenFile (path, &h, tst, -1);
@@ -17828,14 +17845,16 @@ void CL_ProcessSustain ()
 
 	for (i=0, s=cl_sustains; i< MAX_SUSTAINS; i++, s++)
 	{
-		if (s->id)
+		if (s->id) {
 			if ((s->endtime >= cl.gameTime) && (cl.gameTime >= s->nextthink))
 			{
 //				Com_Printf ("think %d %d %d\n", cl.time, s->nextthink, s->thinkinterval);
 				s->think (s);
 			}
-			else if (s->endtime < cl.time)
+			else if (s->endtime < cl.time) {
 				s->id = 0;
+			}
+		}
 	}
 }
 
@@ -20555,13 +20574,13 @@ void SCR_DrawField (int x, int y, float scale_x, float scale_y, int color, int w
 		width = 5;
 
 	SCR_AddDirtyPoint (x, y);
-	SCR_AddDirtyPoint (x+(width*CHAR_WIDTH+2)*scale_x, y+23*scale_y);
+	SCR_AddDirtyPoint (x+(width*Q2_CHAR_WIDTH+2)*scale_x, y+23*scale_y);
 
 	Com_sprintf (num, sizeof(num), "%i", value);
 	l = strlen(num);
 	if (l > width)
 		l = width;
-	x += (2 + CHAR_WIDTH*(width - l))*scale_x;
+	x += (2 + Q2_CHAR_WIDTH*(width - l))*scale_x;
 
 	ptr = num;
 	while (*ptr && l)
@@ -20572,7 +20591,7 @@ void SCR_DrawField (int x, int y, float scale_x, float scale_y, int color, int w
 			frame = *ptr -'0';
 
 		Draw_PicScaled (x,y,scale_x,scale_y,sb_nums[color][frame]);
-		x += CHAR_WIDTH*scale_x;
+		x += Q2_CHAR_WIDTH*scale_x;
 		ptr++;
 		l--;
 	}
@@ -28709,8 +28728,10 @@ pack_t *FS_LoadPackFile (char *packfile, bool isPK2)
 		{
 			Com_Printf (", caching... ");
 			strcpy(&ZipCache[j].pak_name[0], packfile);
-			if (!PackFileOpen (&ZipCache[j]))
+			if (!PackFileOpen (&ZipCache[j])) {
+
 				Com_Error(ERR_FATAL, "Error opening pk2-file: %s", packfile);
+			}
 			Com_Printf ("Done (%i files)", PackFileGetFilesNumber(&ZipCache[j]));
 		}
 		Com_Printf ("\n");
@@ -28969,8 +28990,9 @@ int Sys_FindFiles (const char *path, const char *pattern, char **fileList, int m
 
 #ifdef _WIN32
 	findHandle = FindFirstFile(searchPath, &findInfo);
-	if (findHandle == INVALID_HANDLE_VALUE)
+	if (findHandle == INVALID_HANDLE_VALUE) {
 		return 0;
+	}
 
 	while (findRes)
 	{
@@ -28991,20 +29013,23 @@ int Sys_FindFiles (const char *path, const char *pattern, char **fileList, int m
 		Com_sprintf(findPath, sizeof(findPath), "%s/%s", path, findInfo.cFileName);
 
 		int l = strlen(findPath);
-		for (int j=0 ; j<l ; j++)
+		for (int j=0 ; j<l ; j++) {
 			findPath[j] = tolower(findPath[j]);
+		}
 
 		if (findInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
 		{
 			// Add a directory
-			if (addDirs && (fileCount < maxFiles))
+			if (addDirs && (fileCount < maxFiles)) {
 				fileList[fileCount++] = CopyString(findPath);
+			}
 		}
 		else
 		{
 			// Add a file
-			if (addFiles && (fileCount < maxFiles))
+			if (addFiles && (fileCount < maxFiles)) {
 				fileList[fileCount++] = CopyString(findPath);
+			}
 		}
 
 		findRes = FindNextFile(findHandle, &findInfo);
@@ -29013,36 +29038,42 @@ int Sys_FindFiles (const char *path, const char *pattern, char **fileList, int m
 	FindClose(findHandle);
 #else
 	hFile = scandir(searchPath, &n_file, NULL, NULL);
-	if (hFile == -1)
+	if (hFile == -1) {
+		Com_DPrintf("Sys_FindFiles(): scandir hFile returned(-1) path(%s)\n",(const char*)searchPath);
 		return 0;
+	}
 
 	for (int i = 0; i < hFile; i++)
 	{
 		// Check for invalid file name
-		if (n_file[i]->d_name[ strlen( n_file[i]->d_name ) - 1 ] == '.')
+		if (n_file[i]->d_name[ strlen( n_file[i]->d_name ) - 1 ] == '.') {
 			goto end;
-
+		}
 		// Match pattern
-		if (!Q_GlobMatch(pattern, n_file[i]->d_name, false))
+		if (!Q_GlobMatch(pattern, n_file[i]->d_name, false)) {
 			goto end;
+		}
 
 		Com_sprintf(findPath, sizeof(findPath), "%s/%s", path, n_file[i]->d_name);
 
 		int l = strlen(findPath);
-		for (int j = 0; j<l; j++)
+		for (int j = 0; j<l; j++) {
 			findPath[j] = tolower(findPath[j]);
+		}
 
 		if (n_file[i]->d_type == DT_DIR)
 		{
 			// Add a directory
-			if (addDirs && (fileCount < maxFiles))
-				fileList[fileCount++] = CopyString(findPath);
+			if (addDirs && (fileCount < maxFiles)) {
+				fileList[fileCount++] = CopyString(findPath); 
+			}
 		}
 		else
 		{
 			// Add a file
-			if (addFiles && (fileCount < maxFiles))
-				fileList[fileCount++] = CopyString(findPath);
+			if (addFiles && (fileCount < maxFiles)){
+				fileList[fileCount++] = CopyString(findPath); 
+			}
 		}
 	end:
 		free(n_file[i]);
@@ -30251,20 +30282,23 @@ void FS_Path_f ()
 		Com_Printf ("Current search path:\n--------------------\n");
 		for (s=fs_searchpaths ; s ; s=s->next)
 		{
-			if ((s == fs_base_searchpaths) && (s != fs_searchpaths))
+			if ((s == fs_base_searchpaths) && (s != fs_searchpaths)) {
 				Com_Printf ("--------------------\n");
+			}			
 			if (s->pack)
 			{
 				if (!s->disabled)
 				{
-					if (s->pack->isPK2)
+					if (s->pack->isPK2)	{
 						Com_Printf ("%s \n", s->pack->filename);
-					else
+					} else {
 						Com_Printf ("%s (%i files)\n", s->pack->filename, s->pack->numfiles);
+					}				
 				}
 			}
-			else
+			else {
 				Com_Printf ("%s\n", s->filename);
+			}
 		}
 	}
 
@@ -43062,7 +43096,8 @@ void IN_StartupJoystick ()
 	}
 
 	// abort startup if we didn't find a valid joystick
-	if ((numdevs = SDL_NumJoysticks ()) == 0)
+	numdevs = SDL_NumJoysticks();
+	if (numdevs == 0)
 	{
 		Com_Printf ("joystick not found -- no valid joysticks\n\n");
 		SDL_QuitSubSystem (SDL_INIT_JOYSTICK);
@@ -43072,15 +43107,18 @@ void IN_StartupJoystick ()
 	// allow user to specify joystick by index
 	joy_index = Cvar_Get ("joy_index", "0", CVAR_NOSET);
 
-	if ((joy = SDL_JoystickOpen ((int)joy_index->value)) == NULL)
+	joy = SDL_JoystickOpen((int)joy_index->value);
+	if (joy == NULL)
 	{
 		Com_Printf ("^1Failed to open joystick %i\n\n", (int)joy_index->value);
 		SDL_QuitSubSystem (SDL_INIT_JOYSTICK);
 		return;
 	}
 
-	if (joy_name = SDL_JoystickName (joy))
-		Cvar_Set ("joy_name", joy_name);
+	joy_name = SDL_JoystickName(joy);
+	if (joy_name) {
+		Cvar_Set ("joy_name", (const char*)joy_name);
+	}
 
 	// save the joystick's number of buttons and POV status
 	joy_numbuttons = SDL_JoystickNumButtons (joy);
@@ -57293,16 +57331,13 @@ void SplitPolygon(vec3_t *polygon,int *signs, int vnum, dplane_t *plane, vec3_t 
 	int i;
 	float sect;
 
-	for (i=0;  i<vnum; i++)
-	{
+	for (i=0;  i<vnum; i++) {
 		ptB = &polygon[i];
 		sideB = signs[i];
 
 		//is b on "right side"
-		if (sideB == 2)
-		{
-			if (sideA == 1)
-			{
+		if (sideB == 2) {
+			if (sideA == 1) {
 				// compute the intersection point of the line
 				// from point A to point B with the partition
 				// plane. This is a simple ray-plane intersection.
@@ -57320,51 +57355,46 @@ void SplitPolygon(vec3_t *polygon,int *signs, int vnum, dplane_t *plane, vec3_t 
 			}
 			VectorCopy (polygon[i], outpts[out_c]);
 			out_c++;
-		}
-		//b is on "left" side
-		else
-			if (sideB ==1)
-			{
-				if (sideA == 2)
-				{
-					// compute the intersection point of the line
-					// from point A to point B with the partition
-					// plane. This is a simple ray-plane intersection.
-					VectorSubtract ((*ptB), (*ptA), v);
-					sect = - (DotProduct (plane->normal, (*ptA) )-plane->dist) / DotProduct (plane->normal, v);
-					VectorScale (v,sect,v);
 
-					//add a new vertex
-					VectorAdd ((*ptA), v, newVert);
-					VectorCopy (newVert, inpts[in_c]);
-					VectorCopy (newVert, outpts[out_c]);
+		} else if (sideB ==1) { //b is on "left" side
+			if (sideA == 2) {
+				// compute the intersection point of the line
+				// from point A to point B with the partition
+				// plane. This is a simple ray-plane intersection.
+				VectorSubtract ((*ptB), (*ptA), v);
+				sect = - (DotProduct (plane->normal, (*ptA) )-plane->dist) / DotProduct (plane->normal, v);
+				VectorScale (v,sect,v);
 
-					out_c++;
-					in_c++;
-				}
-				VectorCopy (polygon[i], inpts[in_c]);
-				in_c++;
-			}
-			//b is almost on plane
-			else
-			{
-				VectorCopy (polygon[i], inpts[in_c]);
-				VectorCopy (inpts[in_c], outpts[out_c]);
-				in_c++;
+				//add a new vertex
+				VectorAdd ((*ptA), v, newVert);
+				VectorCopy (newVert, inpts[in_c]);
+				VectorCopy (newVert, outpts[out_c]);
+
 				out_c++;
+				in_c++;
 			}
+			VectorCopy (polygon[i], inpts[in_c]);
+			in_c++;
 
-			ptA = ptB;
-			sideA = sideB;
+		} else { //b is almost on plane
+				
+			VectorCopy (polygon[i], inpts[in_c]);
+			VectorCopy (inpts[in_c], outpts[out_c]);
+			in_c++;
+			out_c++;
+		}
 
-			if ((out_c > MAX_POLY_VERT) || (in_c > MAX_POLY_VERT))
-			{
-				Com_DPrintf ("MAX_POLY_VERT exceeded: %i %i\n", in_c, out_c);
-				//just return what we've got
-				(*innum) = in_c;
-				(*outnum) = out_c;
-				return;
-			}
+		ptA = ptB;
+		sideA = sideB;
+
+		if ((out_c > MAX_POLY_VERT) || (in_c > MAX_POLY_VERT))
+		{
+			Com_DPrintf ("MAX_POLY_VERT exceeded: %i %i\n", in_c, out_c);
+			//just return what we've got
+			(*innum) = in_c;
+			(*outnum) = out_c;
+			return;
+		}
 	}
 
 	(*innum) = in_c;
@@ -57394,23 +57424,26 @@ void TryToCacheTrackIfNeed(char *track)
 			{
 				FS_CreatePath(name);
 				f = FS_Fopen(name, "wb");
-				if (f)
+				if (f) {
 					fwrite (s_backgroundFile, s_backgroundFileLength, 1, f);
+				}
 			}
 			Z_Free( s_backgroundFile );
 			s_backgroundFile = NULL;
 			s_playingFile[0] = 0;
-			if (!f)
+			if (!f) {
 				goto er;
-			else
+			} else {
 				Com_Printf("^2%i msec\n", endTime - startTime);
+			}
 		}
 		else
 er:			Com_Printf("^1failed\n");
 	}
 
-	if (f)
+	if (f) {
 		fclose (f);
+	}
 }
 
 /*
@@ -84550,25 +84583,28 @@ void SpinControl_DoSlide( menulist_s *s, int dir )
 ///		s->curvalue = 0;
 ///	else if ( s->itemnames[s->curvalue] == 0 )
 ///		s->curvalue--;
-if ( s->curvalue < 0 )
-{
-	s->curvalue = 0;
-	while (1)
-	{
-		if (s->itemnames[s->curvalue])
-			s->curvalue++;
-		else
-		{
-			s->curvalue--;
-			break;
-		}
-	}
-}
-else if ( s->itemnames[s->curvalue] == 0 )
-	s->curvalue = 0;
 
-	if ( s->generic.callback )
+	if ( s->curvalue < 0 )
+	{
+		s->curvalue = 0;
+		while (1)
+		{
+			if (s->itemnames[s->curvalue]) {
+				s->curvalue++;
+			}
+			else
+			{
+				s->curvalue--;
+				break;
+			}
+		}
+	} else if ( s->itemnames[s->curvalue] == 0 ) {
+		s->curvalue = 0;
+	}
+
+	if ( s->generic.callback ) {
 		s->generic.callback( s );
+	}
 }
 
 
@@ -89170,8 +89206,9 @@ bool	Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 	sequence_ack = MSG_ReadLong (msg);
 
 	// read the qport if we are a server
-	if (chan->sock == NS_SERVER)
+	if ((chan->sock) == NS_SERVER) {
 		qport = MSG_ReadShort (msg);
+	}
 
 	reliable_message = sequence >> 31;
 	reliable_ack = sequence_ack >> 31;
@@ -89182,9 +89219,9 @@ bool	Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 //
 // discard stale or duplicated packets
 //
-	if (sequence <= chan->incoming_sequence)
+	if (sequence <= (chan->incoming_sequence)) {
 		return false;
-
+	}
 //
 // dropped packets don't keep the message from being used
 //
@@ -89194,9 +89231,9 @@ bool	Netchan_Process (netchan_t *chan, sizebuf_t *msg)
 // if the current outgoing reliable message has been acknowledged
 // clear the buffer to make way for the next
 //
-	if (reliable_ack == chan->reliable_sequence)
+	if (reliable_ack == (chan->reliable_sequence)) {
 		chan->reliable_length = 0;	// it has been received
-
+	}
 //
 // if this message contains a reliable message, bump incoming_reliable_sequence
 //
