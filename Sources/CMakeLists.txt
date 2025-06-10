@@ -459,6 +459,10 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_CO
 	add_compile_options(-Wno-unused-value)    # same here (the Scripts generate tons of unused variables and values)
 	add_compile_options(-Wno-missing-braces)
 	add_compile_options(-Wno-aggressive-loop-optimizations)
+	add_compile_options(-Wno-stringop-overflow)
+	add_compile_options(-Wno-unused-but-set-variable)
+	add_compile_options(-Wno-format-overflow)
+	add_compile_options(-Wno-restrict)
 	# MESSAGE(WARNING, "re-enable some of the warnings some day!")
 
 	if(MACOSX)

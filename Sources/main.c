@@ -15611,7 +15611,7 @@ void CL_TrapParticles (entity_t *ent)
 				dir[2] = k * 8;
 
 				VectorNormalize (dir);
-				vel = 50 + rand()&63;
+				vel = 50 + (rand()&63); // ### TODO: fix me
 				VectorScale (dir, vel, p->vel);
 				p->type = part_simple;
 
@@ -20748,7 +20748,7 @@ void SCR_ExecuteLayoutString (char *s, bool is_hud)
 					Com_Error (ERR_DROP, "Pic >= MAX_IMAGES_BERS");
 				cs_images = CS_IMAGES_BERS;
 			}
-			if (cl.configstrings[cs_images+value])
+			if (cl.configstrings[cs_images+value]) // [-Waddress] ### the address is always equal to true
 			{
 				if (!scr_3dhud->value)
 					goto hud2d;
@@ -24093,8 +24093,9 @@ void Key_Console (int key)
 		 ( ( ( key == K_INS ) || ( key == K_KP_INS ) ) && keydown[K_SHIFT] ) )
 	{
 		char *cbd;
+		cbd = SDL_GetClipboardText();
 
-		if ( cbd = SDL_GetClipboardText() )
+		if ( cbd )
 		{
 			int i;
 
@@ -25668,7 +25669,7 @@ bool NET_GetPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_message)
 
 	if (net_compatibility->value)
 	{
-		ret = recvfrom (net_socket, (char*)net_message->data, net_message->maxsize, 0, (struct sockaddr *)&from, &fromlen);
+		ret = recvfrom (net_socket, (char*)net_message->data, net_message->maxsize, 0, (struct sockaddr *)&from, (unsigned int *)&fromlen);
 		if (ret!=-1)
 		{
 			net_incoming += ret;
@@ -25679,7 +25680,7 @@ bool NET_GetPacket (netsrc_t sock, netadr_t *net_from, sizebuf_t *net_message)
 	}
 	else
 	{
-		ret = recvfrom (net_socket, (char*)compressed_frame, sizeof(compressed_frame), 0, (struct sockaddr *)&from, &fromlen);
+		ret = recvfrom (net_socket, (char*)compressed_frame, sizeof(compressed_frame), 0, (struct sockaddr *)&from, (unsigned int *)&fromlen);
 		if (ret != -1)
 		{
 			int		saved___;
@@ -29404,6 +29405,7 @@ char *Sys_FindFirst ( char *path, unsigned musthave, unsigned canthave )
 {
 	struct dirent *d;
 	char *p;
+	p = NULL;
 
 	if (fdir)
 	{
@@ -29413,20 +29415,25 @@ char *Sys_FindFirst ( char *path, unsigned musthave, unsigned canthave )
 
 	Q_strncpyz(findbase, path, sizeof(findbase));
 
-	if (p = strrchr(findbase, '/'))
+	p = strrchr(findbase, '/');
+	if (p)
 	{
 		*p = 0;
 		Q_strncpyz(findpattern, p + 1, sizeof(findpattern));
+	} else {
+		Q_strncpyz(findpattern, "*", sizeof(findpattern));
 	}
-	else
-		Q_strncpyz(findpattern, "*", sizeof(findpattern));
 
-	if (!strcmp(findpattern, "*.*"))
+	if (!strcmp(findpattern, "*.*")) {
 		Q_strncpyz(findpattern, "*", sizeof(findpattern));
+	}
 
-	if (!(fdir = opendir(findbase)))
+	if (!(fdir = opendir(findbase))) {
 		return NULL;
-	while ((d = readdir(fdir)))
+	}
+
+	d = readdir(fdir);
+	while (d)
 	{
 		if (!*findpattern || Q_GlobMatch(findpattern, d->d_name, false))
 		{
@@ -29436,6 +29443,7 @@ char *Sys_FindFirst ( char *path, unsigned musthave, unsigned canthave )
 				return findpath;
 			}
 		}
+		d = readdir(fdir);
 	}
 	return NULL;
 }
@@ -30137,9 +30145,12 @@ char *Sys_FindNext ( unsigned musthave, unsigned canthave )
 {
 	struct dirent *d;
 
-	if (!fdir)
+	if (!fdir) {
 		return NULL;
-	while (d = readdir(fdir))
+	}
+
+	d = readdir(fdir);
+	while (d)
 	{
 		if (!*findpattern || Q_GlobMatch(findpattern, d->d_name, false))
 		{
@@ -30149,6 +30160,7 @@ char *Sys_FindNext ( unsigned musthave, unsigned canthave )
 				return findpath;
 			}
 		}
+		d = readdir(fdir);
 	}
 	return NULL;
 }
@@ -33407,10 +33419,12 @@ void CL_BrassShells (vec3_t org, vec3_t dir, int count, bool mshell)
 	{
 		if (!free_clentities)
 		{
-			if (!R_FreeClEntities())
+			if (!R_FreeClEntities()) {
 				return;
-			if (!free_clentities)
+			}
+			if (!free_clentities) {
 				return;
+			}
 		}
 		p = free_clentities;
 		free_clentities = p->next;
@@ -33419,7 +33433,7 @@ void CL_BrassShells (vec3_t org, vec3_t dir, int count, bool mshell)
 
 		p->time = cl.leveltime;
 
-		d = 192+rand()&63;
+		d = 192+(rand()&63);
 		for (j=0 ; j<3 ; j++)
 		{
 			p->lastOrg[j] = p->org[j] = org[j];
@@ -33430,16 +33444,18 @@ void CL_BrassShells (vec3_t org, vec3_t dir, int count, bool mshell)
 		p->accel[1] = crand()*32;
 		p->accel[2] = -6*PARTICLE_GRAVITY;
 		p->alpha = 1.0;
-		if (mshell)
+		if (mshell) {
 			p->alphavel = (-1 - frand()*0.2) / max(1.0, r_brassTimeScale->value);
-		else
+		} else {
 			p->alphavel = (-0.2 - frand()*0.2) / max(1.0, r_brassTimeScale->value);
+		}
 
 		p->flags = PARTICLE_BOUNCE | PARTICLE_FRICTION | PARTICLE_ROTATE;
-		if(mshell)
+		if(mshell) {
 			p->model = cl_mod_mshell;
-		else
+		} else {
 			p->model = cl_mod_sshell;
+		}
 
 		p->skin = NULL;
 
@@ -33514,7 +33530,7 @@ void CL_ParseTEnt (bool large_map)
 	int			type;
 	vec3_t		pos, pos2, dir;
 	explosion_t	*ex;
-	int			cnt;
+	int			cnt,cnt0;
 	byte		color;
 	byte		color_r;
 	byte		color_g;
@@ -33786,7 +33802,8 @@ step1:			if (!(trace.surface->flags & SURF_NODRAW))
 		MSG_ReadPos (&net_message, pos, large_map);
 		MSG_ReadDir (&net_message, dir);
 		color = MSG_ReadByte (&net_message);
-		if (cnt*p_sparks->value)
+		cnt0=cnt*(p_sparks->value);
+		if (cnt0)
 		{
 			color_r = d_8to24table[color*3+0];
 			color_g = d_8to24table[color*3+1];
@@ -36436,7 +36453,8 @@ defgibs:	for (i=0; i<4; i++)
 		MSG_ReadPos (&net_message, pos, large_map);
 		MSG_ReadDir (&net_message, dir);
 		color = MSG_ReadByte (&net_message);
-		if (cnt*p_sparks->value)
+		cnt0=cnt*(p_sparks->value);
+		if (cnt0)
 		{
 			color_r = d_8to24table[color*3+0];
 			color_g = d_8to24table[color*3+1];
@@ -36485,7 +36503,8 @@ defgibs:	for (i=0; i<4; i++)
 		MSG_ReadPos (&net_message, pos, large_map);
 		MSG_ReadDir (&net_message, dir);
 		color = MSG_ReadByte (&net_message);
-		if (cnt*p_sparks->value)
+		cnt0=cnt*(p_sparks->value);
+		if (cnt0)
 		{
 			color_r = d_8to24table[color*3+0];
 			color_g = d_8to24table[color*3+1];
@@ -40467,10 +40486,12 @@ void SV_BeginDownload_f()
 	//r1ch: fix some ./ references in maps, eg ./textures/map/file
 	length = strlen(name);
 	p = name;
-	while (p = strstr (p, "./"))
+	p = strstr (p, "./");
+	while ( p )
 	{
 		memmove (p, p+2, length - (p - name) - 1);
 		length -= 2;
+		p = strstr (p, "./");
 	}
 
 	// hacked by zoid to allow more conrol over download
@@ -43117,7 +43138,7 @@ void IN_StartupJoystick ()
 
 	joy_name = SDL_JoystickName(joy);
 	if (joy_name) {
-		Cvar_Set ("joy_name", (const char*)joy_name);
+		Cvar_Set ("joy_name", (char*)joy_name);
 	}
 
 	// save the joystick's number of buttons and POV status
@@ -45561,14 +45582,15 @@ void Cvar_Set_f ()
 
 	if (c == 4)
 	{
-		if (!strcmp(Cmd_Argv(3), "u"))
+		if (!strcmp(Cmd_Argv(3), "u")) {
 			flags = CVAR_USERINFO;
-		else if (!strcmp(Cmd_Argv(3), "s"))
+		} else if (!strcmp(Cmd_Argv(3), "s")) {
 			flags = CVAR_SERVERINFO;
-		else if (!strcmp(Cmd_Argv(3), "a"))
+		} else if (!strcmp(Cmd_Argv(3), "a")) {
 			flags = CVAR_ARCHIVE;
-		else if (!strcmp(Cmd_Argv(3), "-a"))
+		} else if (!strcmp(Cmd_Argv(3), "-a")) {
 			flags = 0;
+		}
 		else
 		{
 			Com_Printf ("^3flags can only be 'u' or 's' or 'a' or '-a'\n");
@@ -45579,22 +45601,28 @@ void Cvar_Set_f ()
 		cvar_t *var = Cvar_FindVar(Cmd_Argv(1));
 		if (var)
 		{
-			if (!(flags & CVAR_ARCHIVE))
+			if (!(flags & CVAR_ARCHIVE)) {
 				var->flags &= ~CVAR_ARCHIVE;		// allow to reset CVAR_ARCHIVE
-			if ((flags & CVAR_USERINFO) && (var->flags & CVAR_SERVERINFO) ||
-				(flags & CVAR_SERVERINFO) && (var->flags & CVAR_USERINFO))
+			}
+			if (((flags & CVAR_USERINFO) && (var->flags & CVAR_SERVERINFO)) ||
+				((flags & CVAR_SERVERINFO) && (var->flags & CVAR_USERINFO))) {
 				Com_Printf ("^3attempt to set incorrect flag\n");
-			else if ((flags & CVAR_ARCHIVE) && !Q_strcasecmp(var->name, "game"))
+			}
+			else if ((flags & CVAR_ARCHIVE) && !Q_strcasecmp(var->name, "game")) {
 				Com_Printf ("^3'game' can't be archived\n");
-			else
+			}
+			else {
 				var->flags |= flags;
+			}
 			Cvar_Set (Cmd_Argv(1), Cmd_Argv(2));
 		}
-		else
+		else {
 			Cvar_FullSet (Cmd_Argv(1), Cmd_Argv(2), flags);
+		}
 	}
-	else
+	else {
 		Cvar_Set (Cmd_Argv(1), Cmd_Argv(2));
+	}
 }
 
 
@@ -45619,8 +45647,8 @@ void Cvar_Set2_f ()
 	cvar_t *var = Cvar_FindVar(Cmd_Argv(1));
 	if (var)
 	{
-		if ((flags & CVAR_USERINFO) && (var->flags & CVAR_SERVERINFO) ||
-			(flags & CVAR_SERVERINFO) && (var->flags & CVAR_USERINFO))
+		if (((flags & CVAR_USERINFO) && (var->flags & CVAR_SERVERINFO)) ||
+			((flags & CVAR_SERVERINFO) && (var->flags & CVAR_USERINFO)))
 			Com_Printf ("^3attempt to set incorrect flag\n");
 		else if ((flags & CVAR_ARCHIVE) && !Q_strcasecmp(var->name, "game"))
 			Com_Printf ("^3'game' can't be archived\n");
@@ -84497,8 +84525,8 @@ bool Field_Key( menufield_s *f, int key )
 		 ( ( ( key == K_INS ) || ( key == K_KP_INS ) ) && keydown[K_SHIFT] ) )
 	{
 		char *cbd;
-
-		if ( cbd = SDL_GetClipboardText() )
+		cbd = SDL_GetClipboardText();
+		if ( cbd  )
 		{
 			strtok( cbd, "\n\r\b" );
 
@@ -92790,7 +92818,7 @@ void CL_ForceWall (vec3_t start, vec3_t end, int color)
 			p->alpha = 1.0;
 			p->alphavel =  -1.0 / (3.0+frand()*0.5);
 
-			int colr = color + rand()&7;
+			int colr = color + (rand()&7);
 			p->color_r0 = p->color_r1 = d_8to24table[colr*3+0];
 			p->color_g0 = p->color_g1 = d_8to24table[colr*3+1];
 			p->color_b0 = p->color_b1 = d_8to24table[colr*3+2];
@@ -93171,9 +93199,9 @@ void CL_ColorExplosionParticles (vec3_t org, int color, int run)
 		p->flags = PARTICLE_BOUNCE | PARTICLE_FRICTION;
 		p->time = cl.gameTime;
 ///	p->color = color + (rand() % run);
-		p->color_r0 = p->color_r1 = color & 0xC0 + (rand() % run);
-		p->color_g0 = p->color_g1 = (color << 3) & 0xC0 + (rand() % run);
-		p->color_b0 = p->color_b1 = (color << 6) & 0xC0 + (rand() % run);
+		p->color_r0 = p->color_r1 = (color & 0xC0) + (rand() % run);
+		p->color_g0 = p->color_g1 = ((color << 3) & 0xC0) + (rand() % run);
+		p->color_b0 = p->color_b1 = ((color << 6) & 0xC0) + (rand() % run);
 
 		for (j=0 ; j<3 ; j++)
 		{

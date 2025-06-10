@@ -37,7 +37,7 @@ CLIENT_DIR=.
 
 
 CC?=gcc
-BASE_CFLAGS?=-Wno-missing-braces -Wno-switch -Wno-unused-variable -Wno-maybe-uninitialized -Wno-unused-variable -Wno-unused-value
+BASE_CFLAGS?=-Wno-missing-braces -Wno-switch -Wno-unused-variable -Wno-maybe-uninitialized -Wno-unused-variable -Wno-unused-value -Wno-stringop-overflow
 BASE_CFLAGS+=-Wno-stringop-truncation -Wno-format-security -Wno-char-subscripts -Wno-unused-result -Wno-unknown-pragmas -Wno-aggressive-loop-optimizations
 
 

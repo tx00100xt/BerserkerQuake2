@@ -13944,13 +13944,14 @@ void Use_Envirosuit (edict_t *ent, gitem_t *item)
 	ent->client->pers.inventory[ITEM_INDEX(item)]--;
 	ValidateSelectedItem (ent);
 
-	if (ent->client->enviro_framenum > level.framenum)
+	if (ent->client->enviro_framenum > level.framenum) {
 		ent->client->enviro_framenum += 300;
-	else
+	} else {
 		ent->client->enviro_framenum = level.framenum + 300;
+	}
 
-		ent->client->ps.rdflags |= RDF_ENVIRO;	// Включаем эффект enviro
-		ent->client->ps.rdflags |= RDF_MASK;
+	ent->client->ps.rdflags |= RDF_ENVIRO;	// Включаем эффект enviro
+	ent->client->ps.rdflags |= RDF_MASK;
 ////	if(!net_compatibility->value)
 ////	{
 ////		gi.WriteByte (svc_rfx);
@@ -23598,18 +23599,19 @@ void makron_pain (edict_t *self, edict_t *other, float kick, int damage)
 	}
 	else
 	{
-		if (damage <= 150)
+		if (damage <= 150) {
 			if (random() <= 0.45)
 			{
 				gi.sound (self, CHAN_VOICE, makron_sound_pain6, 1, ATTN_NONE,0);
 				self->monsterinfo.currentmove = &makron_move_pain6;
 			}
-		else
+		} else {
 			if (random() <= 0.35)
 			{
 				gi.sound (self, CHAN_VOICE, makron_sound_pain6, 1, ATTN_NONE,0);
 				self->monsterinfo.currentmove = &makron_move_pain6;
 			}
+		}
 	}
 };
 
@@ -28471,40 +28473,44 @@ void insane_onground (edict_t *self)
 void insane_checkdown (edict_t *self)
 {
 //	if ( (self->s.frame == INSANE_FRAME_stand94) || (self->s.frame == INSANE_FRAME_stand65) )
-	if (self->spawnflags & 32)				// Always stand
+	if (self->spawnflags & 32)	{			// Always stand
 		return;
-	if (random() < 0.3)
-		if (random() < 0.5)
+	}
+	if (random() < 0.3) {
+		if (random() < 0.5) {
 			self->monsterinfo.currentmove = &insane_move_uptodown;
-		else
+		} else {
 			self->monsterinfo.currentmove = &insane_move_jumpdown;
+		}
+	}
 }
 
 void insane_checkup (edict_t *self)
 {
 	// If Hold_Ground and Crawl are set
-	if ( (self->spawnflags & 4) && (self->spawnflags & 16) )
+	if ( (self->spawnflags & 4) && (self->spawnflags & 16) ) {
 		return;
-	if (random() < 0.5)
+	}
+	if (random() < 0.5) {
 		self->monsterinfo.currentmove = &insane_move_downtoup;
+	}
 
 }
 
 void insane_stand (edict_t *self)
 {
-	if (self->spawnflags & 8)			// If crucified
-	{
+	if (self->spawnflags & 8) { // If crucified
 		self->monsterinfo.currentmove = &insane_move_cross;
 		self->monsterinfo.aiflags |= AI_STAND_GROUND;
-	}
-	// If Hold_Ground and Crawl are set
-	else if ( (self->spawnflags & 4) && (self->spawnflags & 16) )
+	} else if ( (self->spawnflags & 4) && (self->spawnflags & 16) ) { // If Hold_Ground and Crawl are set
 		self->monsterinfo.currentmove = &insane_move_down;
-	else
-		if (random() < 0.5)
+	} else {
+		if (random() < 0.5) {
 			self->monsterinfo.currentmove = &insane_move_stand_normal;
-		else
+		} else {
 			self->monsterinfo.currentmove = &insane_move_stand_insane;
+		}	
+	}
 }
 
 void insane_dead (edict_t *self)
@@ -30260,7 +30266,7 @@ void chick_reslash(edict_t *self)
 {
 	if (self->enemy->health > 0)
 	{
-		if (range (self, self->enemy) == RANGE_MELEE)
+		if (range (self, self->enemy) == RANGE_MELEE) {
 			if (random() <= 0.9)
 			{
 				self->monsterinfo.currentmove = &chick_move_slash;
@@ -30271,6 +30277,7 @@ void chick_reslash(edict_t *self)
 				self->monsterinfo.currentmove = &chick_move_end_slash;
 				return;
 			}
+		}
 	}
 	self->monsterinfo.currentmove = &chick_move_end_slash;
 }
