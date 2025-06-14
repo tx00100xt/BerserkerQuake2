@@ -2,9 +2,9 @@ name: Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main" ]
 
 jobs:
 
@@ -963,3 +963,84 @@ jobs:
       with:
         name: berserkerq2-${{ steps.date.outputs.time }}-lnx-loongarch64-bin.tar.xz
         path: berserkerq2-${{ steps.date.outputs.time }}-lnx-loongarch64-bin.tar.xz
+
+  build-appimage-x64:
+    name: Build AppImage ${{ matrix.Configuration }} ${{ matrix.Platform }}
+    runs-on: ubuntu-22.04 # ubuntu-22.04 after 2025-04-01. The Ubuntu 20.04 Actions runner will be fully unsupported by 2025-04-01
+    strategy:
+      fail-fast: false
+      matrix:
+        Configuration: [Release]
+        Platform: [x64]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Import GPG key
+        uses: crazy-max/ghaction-import-gpg@v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+        env: # Or as an environment variable
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+
+      - name: List keys5
+        run: gpg -K
+
+      - uses: actions/checkout@v4
+
+      - name: Install packages
+        run: |
+          cd ${{github.workspace}}
+          cp -axv Sources src
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev libsdl2-image-dev &&
+          sudo apt-get install -qq -y zlib1g-dev libglew-dev libjpeg-dev libpng-dev libminizip-dev zlib1g-dev
+          echo Remove the echo after 2025-04-01. The Ubuntu 20.04 Actions runner will be fully unsupported by 2025-04-01
+          sudo add-apt-repository universe
+          sudo apt install libfuse2 
+          
+      - name: Get current date
+        id: date
+        uses: Kaven-Universe/github-action-current-date-time@v1
+        with:
+           format: "YYYYMMDD"
+
+      - name: Show current date
+        run: |
+          echo "${{ steps.date.outputs.time }}"
+
+      - name: Get linuxdeploy AppImage
+        run: |
+            wget -nv -c https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+            chmod +x linuxdeploy-x86_64.AppImage
+
+      - name: Build sources
+        run: |
+            cd ${{github.workspace}}
+            patch --verbose -p1 < AppImage/patches/0001-berserkerq2-AppImage.patch
+            cd src
+            make release
+            make install.local
+
+      - name: Copy compiling binaries 
+        run: |
+            cd ${{github.workspace}}/AppImage
+            cp -axv App AppDir
+            cp -r ../berserkerq2 ../AppImage/AppDir/usr/bin
+            cp -r ../baseq2/libgame.so ../AppImage/AppDir/usr/bin/baseq2
+
+      - name: Build AppImage
+        run: |
+            cd ${{github.workspace}}/AppImage
+            wget -nv -c https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+            chmod +x linuxdeploy-x86_64.AppImage
+            SIGN=1 ./linuxdeploy-x86_64.AppImage --executable AppDir/usr/bin/berserkerq2 --desktop-file AppDir/usr/share/applications/io.github.tx00100xt.BerserkerQuake2.desktop --icon-file AppDir/usr/share/icons/hicolor/128x128/apps/berserkerq2.png --appdir AppDir --output appimage
+            mv -f  ${{github.workspace}}/AppImage/BerserkerQuake2-x86_64.AppImage  ${{github.workspace}}/BerserkerQuake2-${{ steps.date.outputs.time }}-1.45.1-x86_64.AppImage
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: BerserkerQuake2-${{ steps.date.outputs.time }}-1.45.1-x86_64.AppImage
+          path: BerserkerQuake2-${{ steps.date.outputs.time }}-1.45.1-x86_64.AppImage

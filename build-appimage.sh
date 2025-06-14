@@ -4,7 +4,7 @@
           cp -axv Sources src
 
           sudo apt-get update -qq
-          sudo apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev &&
+          sudo apt-get install -qq -y libsdl2-dev libogg-dev libvorbis-dev libsdl2-image-dev &&
           sudo apt-get install -qq -y zlib1g-dev libglew-dev libjpeg-dev libpng-dev libminizip-dev zlib1g-dev
           echo Remove the echo after 2025-04-01. The Ubuntu 20.04 Actions runner will be fully unsupported by 2025-04-01
           echo sudo add-apt-repository universe
