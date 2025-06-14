@@ -1,0 +1,11 @@
+[Desktop Entry]
+Comment=BerserkerQuake2 is an graphically enhanced client for id Software's Quake II
+Categories=Game;Shooter;
+Exec=berserkerq2
+Icon=berserkerq2
+Name=BerserkerQuake2
+StartupNotify=true
+Terminal=false
+Type=Application
+Keywords=quake;berserker;first;person;shooter;multiplayer;
+Name[ru_RU]=io.github.tx00100xt.BerserkerQuake2.desktop

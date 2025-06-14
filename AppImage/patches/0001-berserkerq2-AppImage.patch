@@ -1,0 +1,176 @@
+diff '--color=auto' -aurN a/src/CMakeLists.txt b/src/CMakeLists.txt
+--- a/src/CMakeLists.txt	2025-06-10 21:33:27.884489899 +0300
++++ b/src/CMakeLists.txt	2025-06-13 11:51:20.746684686 +0300
+@@ -517,6 +517,7 @@
+ add_executable(berserkerq2
+     main.c
+     unpak.c
++	appimage.c
+ )
+ ##################################
+ ###    End Sources section     ###
+@@ -531,6 +532,8 @@
+ target_link_libraries(berserkerq2 "m")
+ if(LINUX)
+     target_link_libraries(berserkerq2 "dl")
++    target_link_libraries(berserkerq2 "GLEW")
++    target_link_libraries(berserkerq2 "SDL2_image")
+ endif()
+ target_link_libraries(berserkerq2 "pthread")
+ 
+diff '--color=auto' -aurN a/src/Makefile b/src/Makefile
+--- a/src/Makefile	2025-06-10 21:29:50.000000000 +0300
++++ b/src/Makefile	2025-06-13 14:40:14.594506034 +0300
+@@ -66,7 +66,7 @@
+ endif
+ 
+ ifeq ($(OSTYPE),Linux)
+-  LDFLAGS_ENGINE=-lm -lGL -lvorbis -lvorbisfile -lz -lminizip -lSDL2 -lpng -ljpeg -Wl,-rpath,$$ORIGIN/lib
++  LDFLAGS_ENGINE=-lm -lGL -lvorbis -lvorbisfile -lz -lminizip -lSDL2 -lpng -ljpeg -lSDL2_image -lGLEW -Wl,-rpath,$$ORIGIN/lib
+ else ifeq ($(OSTYPE),OpenBSD)
+   LDFLAGS_ENGINE=-L/usr/local/lib -L/usr/X11R6/lib -lminizip -lm -lGL -lvorbis -lvorbisfile -lz -lSDL2 -lpng -ljpeg -Wl,-rpath,$$ORIGIN/lib
+ endif
+@@ -173,7 +173,8 @@
+ 
+ BERSERKERQ2_OBJS = \
+ 	$(BUILDDIR)/main.o \
+-	$(BUILDDIR)/unpak.o
++	$(BUILDDIR)/unpak.o \
++	$(BUILDDIR)/appimage.o
+ 
+ 
+ $(BUILDDIR)/$(BINDIR)/$(ENGINE) : $(BERSERKERQ2_OBJS)
+@@ -188,6 +189,8 @@
+ $(BUILDDIR)/unpak.o :    $(CLIENT_DIR)/unpak.c
+ 	$(DO_CC)
+ 	
++$(BUILDDIR)/appimage.o :    $(CLIENT_DIR)/appimage.c
++	$(DO_CC)
+ 
+ #############################################################################
+ # GAME LIB
+diff '--color=auto' -aurN a/src/main.c b/src/main.c
+--- a/src/main.c	2025-06-10 21:30:49.233532273 +0300
++++ b/src/main.c	2025-06-13 14:25:35.154583010 +0300
+@@ -31,6 +31,7 @@
+ 
+ #include "defs.h"
+ #include "data.h"
++#include "appimage.h"
+ 
+ #ifdef PLATFORM_UNIX
+ // ############ Unix variables ###########
+@@ -88190,13 +88191,49 @@
+ }
+ 
+ 
++/*
++==================
++COM_AppImageWindow 
++==================
++*/
++static void COM_AppImageWindow(void)
++{
++	appCreate(1600, 740);
++	appRun();
++	shpExit();
++	sprExit();
++	appExit();
++}
++
++
+ void Common_Init (int argc, char **argv)
+ {
+ 	char	*s;
++	char	_strHomeTestFile[2048];
+ 
+ 	if (setjmp (abortframe) )
+ 		Sys_Error ("Error during initialization");
+ 
++	// home dir data...
++	struct passwd *pw = getpwuid(getuid());
++	const char *_homedir = pw->pw_dir;
++
++	// clean 
++	for (int i=0; i< 2048; i++) {
++ 		_strHomeTestFile[i] = 0;
++	}
++	strncpy(_strHomeTestFile, (const char *)_homedir, (size_t)strlen(_homedir));
++	_strHomeTestFile[strlen(_homedir)] = 0x00;
++	strncat(_strHomeTestFile, (const char *)"/.berserkerq2/baseq2/bsq2-01.pk2", (size_t)32);
++
++	if( access((const char *)_strHomeTestFile, F_OK) != 0 ) {
++		printf("Init: Error! Failed access to extra game data\n");
++		printf("Init: Download game data archive from https://github.com/tx00100xt/BerserkerQuake2/releases\n");
++		printf("Init: And unpack to root game directory.\n\n");
++		COM_AppImageWindow();
++		exit(1);
++	}
++
+ 	// reset rand() generator
+ 	srand(time(NULL));
+ 
+@@ -88211,18 +88248,9 @@
+ 	char* _strExePath = SDL_GetBasePath();
+ 	printf("\nInit: Begin...\n");
+ 	printf("Init: Game start with path: %s\n", (const char *)_strExePath);
+-#if defined(__OpenBSD__) || defined(__FreeBSD__)
+-	int _isystempath = strncmp((const char *)_strExePath, (const char *) "/usr/local/bin/", (size_t) 15 );
+-#elif defined(__NetBSD__)
+-	int _isystempath = strncmp((const char *)_strExePath, (const char *) "/usr/pkg/bin/", (size_t) 13 );
+-#else
+-	int _isystempath = strncmp((const char *)_strExePath, (const char *) "/usr/bin/", (size_t) 9 );
+-#endif // defined(__OpenBSD__) || defined(__FreeBSD__)
+-	if( _isystempath == 0 ) {
+-		sys_iSysPath = 1; // using system path
+-	} else {
+-		sys_iSysPath = 0; // using standarted path
+-	}
++
++   // using system path
++   sys_iSysPath = 1;
+ 
+  	// Path vars
+   	int sys_iGameBits  = (int)(CHAR_BIT * sizeof(void *));
+@@ -88235,39 +88263,8 @@
+ 	}
+ 
+   	// get library path
+-#if defined(__OpenBSD__) || defined(__FreeBSD__)
+-  	if( sys_iSysPath == 1 ) {
+-    	strcpy(sys_strLibPath, (const char *)"/usr/local/lib/berserkerq2/");
+-#elif defined(__NetBSD__)
+-  	if( sys_iSysPath == 1 ) {
+-		strcpy(sys_strLibPath, (const char *)"/usr/pkg/lib/berserkerq2/");
+-#else
+-  if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *)"/usr/lib/aarch64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+-    strcpy(sys_strLibPath, (const char *)"/usr/lib/aarch64-linux-gnu/berserkerq2/"); 
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && (access((const char *) "/usr/lib/arm-linux-gnueabihf/berserkerq2/baseq2/libgame.so", F_OK)== 0)) {
+-    strcpy(sys_strLibPath, (const char *)"/usr/lib/arm-linux-gnueabihf/berserkerq2/");
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/riscv64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+-    strcpy(sys_strLibPath, (const char *)"/usr/lib/riscv64-linux-gnu/berserkerq2/");
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/s390x-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+-    strcpy(sys_strLibPath, (const char *)"/usr/lib/s390x-linux-gnu/berserkerq2/"); 
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/powerpc64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+-    strcpy(sys_strLibPath, (const char *)"/usr/lib/powerpc64-linux-gnu/berserkerq2/"); 
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib/x86_64-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+-    strcpy(sys_strLibPath, (const char *)"/usr/lib/x86_64-linux-gnu/berserkerq2/");
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && (access((const char *) "/usr/lib/i386-linux-gnu/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+-    strcpy(sys_strLibPath, (const char *)"/usr/lib/i386-linux-gnu/berserkerq2/");
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 64 && (access((const char *) "/usr/lib64/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+-    strcpy(sys_strLibPath, (const char *) "/usr/lib64//berserkerq2/");
+-  } else if( sys_iSysPath == 1 && sys_iGameBits == 32 && (access((const char *) "/usr/lib/berserkerq2/baseq2/libgame.so", F_OK) == 0)) {
+-    strcpy(sys_strLibPath, (const char *)"/usr/lib//berserkerq2/");
+-#endif
+-  } else if( sys_iSysPath == 0 ) {
+-    printf("Init: Use local install.\n");
+-  } else {
+-    printf("Init: Error! Game libraries not ound!\n");
+-    printf("Init: Failed to search game libraries installed!\nInit: Please reinstall the game.\n");
+-  }
+-  printf("Init: End.\n\n");
++    strcpy(sys_strLibPath, (const char *)_strExePath); 
++  	printf("Init: End.\n\n");
+   
+ #endif // PLATFORM_UNIX
+ // #######################################################################################################

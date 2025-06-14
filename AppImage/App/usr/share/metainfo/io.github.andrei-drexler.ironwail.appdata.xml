@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2004-2014 Serge Borodulin -->
+
+<component type="desktop">
+  <id>io.github.tx00100xt.BerserkerQuake2</id>
+  <name>BerserkerQuake2</name>
+  <summary>BerserkerQuake2 is an graphically enhanced client for id Software's Quake II</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-2.0</project_license>
+
+  <developer_name>Andrei Drexler</developer_name>
+
+  <url type="homepage">http://berserker.quakegate.ru/</url>
+  <url type="bugtracker">https://github.com/tx00100xt/BerserkerQuake2/issues</url>
+  <url type="help">https://github.com/tx00100xt/BerserkerQuake2/wiki</url>
+
+  <launchable type="desktop-id">io.github.tx00100xt.BerserkerQuake2.desktop</launchable>
+
+  <description>
+    <p>BerserkerQuake2 engine that modernizes some elements of the Quake 2 graphical system.
+       This Berserker engine supports real-time per-pixel lighting and shadow volumes, parallax,
+       mirrors, fog, decal system, high resolution textures, and more..</p>
+    <p>BerserkerQuake2 requires a copy of the Quake II game data (Steam, GOG or Quake original CD), and also 
+       additionally freely distributed under the GPL-2.0 license extra game data for BerserkerQuake2. In order
+       to set this up, open (and if necessary create) the directory <code>~/.berserkerq2</code> on your computer 
+       and copy the <code>baseq2</code> directory from a copy of Quake original CD, and also extra game data there. 
+       For more info visit: https://github.com/tx00100xt/BerserkerQuake2</p>
+  </description>
+
+  <screenshots>
+    <screenshot type="default">
+      <image>https://github.com/tx00100xt/BerserkerQuake2/raw/master/Images/image-1.png</image>
+      <caption>BerserkerQuake2 screenshot 1</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/tx00100xt/BerserkerQuake2/raw/master/Images/image-2.png</image>
+      <caption>BerserkerQuake2 screenshot 2</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/tx00100xt/BerserkerQuake2/raw/master/Images/image-3.png</image>
+      <caption>BerserkerQuake2 screenshot 3</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/tx00100xt/BerserkerQuake2/raw/master/Images/image-4.png</image>
+      <caption>BerserkerQuake2 screenshot 4</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/tx00100xt/BerserkerQuake2/raw/master/Images/image-5.png</image>
+      <caption>BerserkerQuake2 screenshot 5</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://github.com/tx00100xt/BerserkerQuake2/raw/master/Images/image-6.png</image>
+      <caption>BerserkerQuake2 screenshot 6</caption>
+    </screenshot>
+  </screenshots>
+
+  <releases>
+    <release version="1.45.1" date="2025-06-13">
+      <description>
+        <p>Release of BerserkerQuake2.</p>
+      </description>
+    </release>
+
+  <content_rating type="oars-1.1">
+    <!-- PEGI gives it 16+ in 2004 -->
+    <content_attribute id="violence-realistic">moderate</content_attribute>
+    <content_attribute id="violence-bloodshed">moderate</content_attribute>
+    <!-- The amount of torture and human suffering is not insignificant with the Strogg -->
+    <content_attribute id="violence-desecration">moderate</content_attribute>
+    <!-- Full multiplayer functionality -->
+    <content_attribute id="social-chat">intense</content_attribute>
+  </content_rating>
+</component>
+
