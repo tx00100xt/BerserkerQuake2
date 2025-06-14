@@ -209,6 +209,24 @@ if you installing the game on the system.
 #### NOTE:
 Non-standard screen resolution can be specified in the **modelist.txt** file.
 
+AppImage
+--------
+[![Get Appimage](https://raw.githubusercontent.com/srevinsaju/get-appimage/master/static/badges/get-appimage-branding-blue.png)](https://github.com/tx00100xt/BerserkerQuake2/releases/tag/1.45.1)
+
+Type this in your terminal:
+
+```
+cd ~/.
+mkdir .berserkerq2
+mkdir .berserkerq2/baseq2
+wget https://github.com/tx00100xt/BerserkerQuake2/releases/download/1.45.1/berserkerq2-1.45.1-data.tar.xz
+tar xJvpf berserkerq2-1.45.1-data.tar.xz -C ~/.berserkerq2
+```
+Copy Quake 2 commercial data (files: pak0.pak,pak1.pak,pak2.pak dir: video,players) 
+from you CD,GOG or Steam to ~/.berserkerq2/baseq2
+
+Run AppImage.
+
 Supported Architectures
 ----------------------
 * `x86`
